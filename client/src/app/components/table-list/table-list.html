@@ -1,0 +1,21 @@
+<div class="container">
+    <h2>Restaurant Tables</h2>
+
+    <div class="table-grid">
+
+        @for (table of tables; track table.id) {
+        <div class="table-card" [class.occupied]="table.status === 'Occupied'">
+            <h3>{{ table.table_number }}</h3>
+            <p class="type">{{ table.type }}</p>
+            <p>Capacity: {{ table.capacity }}</p>
+
+            <div class="status-badge">
+                {{ table.status }}
+            </div>
+        </div>
+        } @empty {
+        <p>No tables found in the database.</p>
+        }
+
+    </div>
+</div>

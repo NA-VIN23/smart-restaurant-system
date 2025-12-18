@@ -1,0 +1,53 @@
+.container {
+    padding: 20px;
+    font-family: sans-serif;
+}
+
+.table-grid {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.table-card {
+    border: 1px solid #ddd;
+    padding: 15px;
+    width: 150px;
+    border-radius: 8px;
+    background: #f8f9fa;
+    /* Light Grey (Available) */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.table-card h3 {
+    margin: 0 0 10px 0;
+    color: #333;
+}
+
+.table-card p {
+    margin: 5px 0;
+    color: #666;
+}
+
+/* Status Styles */
+.status-badge {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    background: #c8e6c9;
+    color: #2e7d32;
+    /* Green for Available */
+}
+
+/* Occupied Style */
+.occupied {
+    background: #ffebee;
+}
+
+.occupied .status-badge {
+    background: #ffcdd2;
+    color: #c62828;
+}

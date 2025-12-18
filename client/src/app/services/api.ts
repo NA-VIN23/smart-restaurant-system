@@ -1,0 +1,24 @@
+// api.ts
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { RestaurantTable } from '../models/types'; // Importing your Contract
+
+@Injectable({
+    providedIn: 'root'
+})
+export class ApiService {
+    private apiUrl = 'http://localhost:3000/api'; // Your Node Backend
+
+    constructor(private http: HttpClient) { }
+
+    // 1. Get All Tables
+    getTables(): Observable<RestaurantTable[]> {
+        return this.http.get<RestaurantTable[]>(`${this.apiUrl}/tables`);
+    }
+
+    // 2. Join Queue (We will add this logic later)
+    joinQueue(userId: number, partySize: number) {
+        return this.http.post(`${this.apiUrl}/queue/join`, { userId, partySize });
+    }
+}
