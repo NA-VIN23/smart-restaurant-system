@@ -1,0 +1,45 @@
+
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, tap } from 'rxjs';
+
+@Injectable({
+    providedIn: 'root'
+})
+/**
+ * Service to handle Authentication
+ */
+export class AuthService {
+    private apiUrl = 'http://localhost:3000/api/auth';
+
+    constructor(private http: HttpClient) { }
+
+    register(userData: any): Observable<any> {
+        return this.http.post(`${this.apiUrl}/register`, userData);
+    }
+
+    login(email: string, password: string): Observable<any> {
+        return this.http.post(`${this.apiUrl}/login`, { email, password }).pipe(
+            tap((res: any) => {
+                if (res.token) {
+                    localStorage.setItem('token', res.token);
+                    localStorage.setItem('user', JSON.stringify(res.user));
+                }
+            })
+        );
+    }
+
+    logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+    }
+
+    isLoggedIn(): boolean {
+        return !!localStorage.getItem('token');
+    }
+
+    getUserRole(): string {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        return user.role || '';
+    }
+}
