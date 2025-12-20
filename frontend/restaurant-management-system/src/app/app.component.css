@@ -1,0 +1,29 @@
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.sidenav-container {
+  flex: 1;
+}
+
+.content {
+  padding: 20px;
+  min-height: calc(100vh - 64px);
+}
+
+/* Responsive styles */
+@media (max-width: 959px) {
+  .content {
+    padding: 16px;
+  }
+}
+
+.active {
+  background-color: rgba(0, 0, 0, 0.04);
+}
