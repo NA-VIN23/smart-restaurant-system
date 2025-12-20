@@ -1,0 +1,16 @@
+.spacer {
+    flex: 1 1 auto;
+}
+
+.content {
+    padding: 20px;
+}
+
+mat-toolbar {
+    margin-bottom: 20px;
+}
+
+a.mat-mdc-button {
+    color: white;
+    /* Ensure links inside toolbar are visible */
+}

@@ -24,6 +24,7 @@ export class ApiService {
         return this.http.post(`${this.apiUrl}/tables`, payload, { withCredentials: true });
     }
 
+<<<<<<< HEAD
     updateTable(id: number, payload: any) {
         return this.http.patch(`${this.apiUrl}/tables/${id}`, payload, { withCredentials: true });
     }
@@ -33,6 +34,24 @@ export class ApiService {
     }
 
     // 2. Join Queue
+=======
+    // 2. Add Table
+    addTable(table: Partial<RestaurantTable>): Observable<any> {
+        return this.http.post(`${this.apiUrl}/tables`, table);
+    }
+
+    // 3. Update Table
+    updateTable(id: number, table: Partial<RestaurantTable>): Observable<any> {
+        return this.http.put(`${this.apiUrl}/tables/${id}`, table);
+    }
+
+    // 4. Delete Table
+    deleteTable(id: number): Observable<any> {
+        return this.http.delete(`${this.apiUrl}/tables/${id}`);
+    }
+
+    // 5. Join Queue (We will add this logic later)
+>>>>>>> origin/main
     joinQueue(userId: number, partySize: number) {
         return this.http.post(`${this.apiUrl}/queue`, { user_id: userId, party_size: partySize }, { withCredentials: true });
     }

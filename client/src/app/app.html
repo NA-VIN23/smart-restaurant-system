@@ -1,2 +1,25 @@
+<<<<<<< HEAD
 <app-header></app-header>
 <router-outlet></router-outlet>
+=======
+<mat-toolbar color="primary">
+    <span>Smart Restaurant</span>
+    <span class="spacer"></span>
+
+    <a mat-button routerLink="/tables">Tables</a>
+    <a mat-button routerLink="/queue">Queue</a>
+
+    <a mat-button *ngIf="authService.getUserRole() === 'Manager'" routerLink="/manager">Dashboard</a>
+
+    <ng-container *ngIf="!authService.isLoggedIn()">
+        <a mat-button routerLink="/login">Login</a>
+        <a mat-button routerLink="/register">Register</a>
+    </ng-container>
+
+    <button mat-button *ngIf="authService.isLoggedIn()" (click)="logout()">Logout</button>
+</mat-toolbar>
+
+<div class="content">
+    <router-outlet></router-outlet>
+</div>
+>>>>>>> origin/main

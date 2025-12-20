@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-=======
 
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -13,40 +7,12 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
->>>>>>> origin/main
+import { MatSelectModule } from '@angular/material/select';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-register',
   standalone: true,
-<<<<<<< HEAD
-  imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './login.html',
-  styleUrls: ['./login.css']
-})
-export class LoginComponent {
-  form: any;
-
-  error: string | null = null;
-
-  constructor(private fb: FormBuilder, private auth: AuthService, private router: Router) {
-    this.form = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required]]
-    });
-  }
-
-  submit() {
-    if (this.form.invalid) return;
-    const { email, password } = this.form.value;
-    this.auth.login(email!, password!).subscribe({
-      next: async () => {
-        await this.auth.loadCurrentUser();
-        this.router.navigate(['/tables']);
-      },
-      error: (err) => {
-        this.error = err?.error?.message || 'Login failed';
-=======
   imports: [
     CommonModule,
     FormsModule,
@@ -54,16 +20,22 @@ export class LoginComponent {
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
-    MatButtonModule
+    MatButtonModule,
+    MatSelectModule
   ],
   template: `
     <div class="auth-container">
       <mat-card>
         <mat-card-header>
-          <mat-card-title>Login</mat-card-title>
+          <mat-card-title>Register</mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          <form (ngSubmit)="onLogin()">
+          <form (ngSubmit)="onRegister()">
+             <mat-form-field appearance="fill" class="full-width">
+              <mat-label>Name</mat-label>
+              <input matInput [(ngModel)]="name" name="name" required>
+            </mat-form-field>
+
             <mat-form-field appearance="fill" class="full-width">
               <mat-label>Email</mat-label>
               <input matInput [(ngModel)]="email" name="email" required>
@@ -74,13 +46,21 @@ export class LoginComponent {
               <input matInput type="password" [(ngModel)]="password" name="password" required>
             </mat-form-field>
 
+            <mat-form-field appearance="fill" class="full-width">
+              <mat-label>Role</mat-label>
+              <mat-select [(ngModel)]="role" name="role" required>
+                <mat-option value="Customer">Customer</mat-option>
+                <mat-option value="Manager">Restaurant Manager</mat-option>
+              </mat-select>
+            </mat-form-field>
+
             <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
 
-            <button mat-raised-button color="primary" type="submit" [disabled]="!email || !password">Login</button>
+            <button mat-raised-button color="primary" type="submit" [disabled]="!email || !password || !name">Register</button>
           </form>
         </mat-card-content>
         <mat-card-actions>
-          <a routerLink="/register">Don't have an account? Register</a>
+          <a routerLink="/login">Already have an account? Login</a>
         </mat-card-actions>
       </mat-card>
     </div>
@@ -93,25 +73,28 @@ export class LoginComponent {
     mat-card-actions { justify-content: center; }
   `]
 })
-export class LoginComponent {
+export class RegisterComponent {
+  name = '';
   email = '';
   password = '';
+  role = 'Customer';
   errorMessage = '';
 
   constructor(private authService: AuthService, private router: Router) { }
 
-  onLogin() {
-    this.authService.login(this.email, this.password).subscribe({
+  onRegister() {
+    this.authService.register({
+      name: this.name,
+      email: this.email,
+      password: this.password,
+      role: this.role
+    }).subscribe({
       next: (res: any) => {
-        if (res.user?.role === 'Manager') {
-          this.router.navigate(['/manager']);
-        } else {
-          this.router.navigate(['/tables']);
-        }
+        // Auto login or redirect to login
+        this.router.navigate(['/login']);
       },
       error: (err: any) => {
-        this.errorMessage = err.error?.message || 'Login failed';
->>>>>>> origin/main
+        this.errorMessage = err.error?.message || 'Registration failed';
       }
     });
   }
