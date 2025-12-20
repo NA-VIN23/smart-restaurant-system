@@ -22,7 +22,12 @@ router
 
 router
   .route('/:id')
-  .patch(authController.restrictTo('manager', 'admin'), queueController.updateQueueStatus)
+  .patch(
+    authController.restrictTo('manager', 'admin'),
+    body('status').isIn(['waiting','seated','cancelled','no-show']).withMessage('Invalid status'),
+    runValidation,
+    queueController.updateQueueStatus
+  )
   .delete(queueController.leaveQueue);
 
 // Get queue position for a user

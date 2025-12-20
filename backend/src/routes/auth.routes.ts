@@ -18,6 +18,10 @@ router.post(
 
 router.post('/login', body('email').isEmail(), body('password').notEmpty(), runValidation, authController.login);
 
+// Get current user
+router.get('/me', authController.protect, authController.getMe);
+router.post('/logout', authController.protect, authController.logout);
+
 // Protected routes (require authentication)
 // router.use(authController.protect);
 

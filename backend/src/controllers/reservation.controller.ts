@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import pool from '../config/database';
+import { getIO } from '../socket';
 import { AppError } from '../middleware/error.middleware';
 
 export interface Reservation {
@@ -35,6 +36,11 @@ export const createReservation = async (
     // Check if reservation is in the future
     if (reservationTime <= now) {
       return next(new AppError('Reservation time must be in the future', 400));
+    }
+
+    // Ensure customers can only create reservations for themselves
+    if (req.user && req.user.role === 'customer' && req.user.id !== user_id) {
+      return next(new AppError('Customers can only create reservations for themselves', 403));
     }
 
     // Check if table exists and is available
@@ -94,6 +100,12 @@ export const createReservation = async (
         reservation: Array.isArray(newReservation) ? newReservation[0] : newReservation,
       },
     });
+    try {
+      const io = getIO();
+      io.emit('reservation:created', { reservation: Array.isArray(newReservation) ? newReservation[0] : newReservation });
+    } catch (e) {
+      // ignore socket errors
+    }
   } catch (err) {
     next(err);
   }
@@ -191,6 +203,10 @@ export const updateReservation = async (
     }
 
     const reservation = reservations[0] as any;
+    // Only allow customers to update their own reservations
+    if (req.user && req.user.role === 'customer' && req.user.id !== reservation.user_id) {
+      return next(new AppError('You do not have permission to update this reservation', 403));
+    }
     
     // Only allow updates to future reservations
     const now = new Date();
@@ -264,6 +280,12 @@ export const updateReservation = async (
         reservation: Array.isArray(updatedReservations) ? updatedReservations[0] : updatedReservations,
       },
     });
+    try {
+      const io = getIO();
+      io.emit('reservation:update', { id, status });
+    } catch (e) {
+      // ignore
+    }
   } catch (err) {
     next(err);
   }
@@ -288,6 +310,10 @@ export const cancelReservation = async (
     }
 
     const reservation = reservations[0] as any;
+    // Only allow customers to cancel their own future reservations
+    if (req.user && req.user.role === 'customer' && req.user.id !== reservation.user_id) {
+      return next(new AppError('You do not have permission to cancel this reservation', 403));
+    }
     
     // Only allow cancellation of future reservations
     const now = new Date();

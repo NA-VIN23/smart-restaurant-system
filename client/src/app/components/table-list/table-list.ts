@@ -8,7 +8,7 @@ import { RestaurantTable } from '../../models/types'; // Using your Contract
   standalone: true,
   imports: [CommonModule], // <--- Must include this to use *ngFor in HTML
   templateUrl: './table-list.html',
-  styleUrl: './table-list.css'
+  styleUrls: ['./table-list.css']
 })
 export class TableListComponent implements OnInit {
   tables: RestaurantTable[] = []; // Store the data here
@@ -26,5 +26,9 @@ export class TableListComponent implements OnInit {
       },
       error: (err) => console.error('Error loading tables:', err)
     });
+  }
+
+  trackById(index: number, item: RestaurantTable) {
+    return item.id;
   }
 }

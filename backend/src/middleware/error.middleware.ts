@@ -27,7 +27,7 @@ export const errorHandler = (
   if (process.env.NODE_ENV === 'development') {
     sendErrorDev(err, req, res);
   } else {
-    let error = { ...err };
+    const error = { ...err } as any;
     error.message = err.message;
 
     sendErrorProd(error, req, res);

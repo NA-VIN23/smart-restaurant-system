@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import pool from '../config/database';
 import { AppError } from '../middleware/error.middleware';
+import { getIO } from '../socket';
 
 export interface QueueEntry {
   id: number;
@@ -32,19 +33,19 @@ export const calculateWaitTime = async (partySize: number): Promise<number> => {
     }
 
     // Get all active reservations and queue entries
-    const [reservations] = await pool.query(
+    const [reservations] = (await pool.query(
       `SELECT * FROM reservations 
        WHERE status IN ('confirmed', 'seated') 
        AND reservation_time >= NOW() 
        AND reservation_time <= DATE_ADD(NOW(), INTERVAL 4 HOUR)
        ORDER BY reservation_time`
-    );
+    )) as any;
 
-    const [queueEntries] = await pool.query(
+    const [queueEntries] = (await pool.query(
       `SELECT * FROM queue 
        WHERE status = 'waiting' 
        ORDER BY created_at`
-    ) as [QueueEntry[], any];
+    )) as any as [QueueEntry[], any];
 
     // Calculate estimated wait time
     let estimatedWait = 0;
@@ -89,12 +90,15 @@ export const joinQueue = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { user_id, party_size, contact_number } = req.body;
+    const { user_id: bodyUserId, party_size } = req.body;
+    const user_id = req.user && req.user.role === 'customer' ? req.user.id : bodyUserId;
 
     // Validate input
     if (!user_id || !party_size) {
       return next(new AppError('User ID and party size are required', 400));
     }
+
+    if (!user_id) return next(new AppError('User ID is required', 400));
 
     // Check if user is already in the queue
     const [existingEntries] = await pool.query(
@@ -120,9 +124,9 @@ export const joinQueue = async (
     // Add to queue
     const [result] = await pool.query(
       `INSERT INTO queue 
-       (user_id, party_size, status, queue_position, estimated_wait_time, contact_number)
-       VALUES (?, ?, 'waiting', ?, ?, ?)`,
-      [user_id, party_size, queuePosition, estimatedWaitTime, contact_number || null]
+       (user_id, party_size, status, queue_position, estimated_wait_time)
+       VALUES (?, ?, 'waiting', ?, ?)`,
+      [user_id, party_size, queuePosition, estimatedWaitTime]
     );
 
     // Get the queue entry
@@ -137,6 +141,13 @@ export const joinQueue = async (
         queue: Array.isArray(queueEntries) ? queueEntries[0] : queueEntries,
       },
     });
+
+    try {
+      const io = getIO();
+      io.emit('queue:join', { user_id, party_size, queue_position: queuePosition });
+    } catch (e) {
+      // socket not initialized in tests or errors; ignore
+    }
   } catch (err) {
     next(err);
   }
@@ -175,6 +186,11 @@ export const getQueuePosition = async (
 ): Promise<void> => {
   try {
     const { userId } = req.params;
+
+    // Customers can only get their own position
+    if (req.user && req.user.role === 'customer' && req.user.id !== parseInt(userId, 10)) {
+      return next(new AppError('You do not have permission to view this queue position', 403));
+    }
 
     const [queueEntries] = await pool.query(
       `SELECT * FROM queue 
@@ -276,6 +292,13 @@ export const updateQueueStatus = async (
       [id]
     );
 
+    try {
+      const io = getIO();
+      io.emit('queue:update', { id, status, tableId });
+    } catch (e) {
+      // ignore socket errors
+    }
+
     res.status(200).json({
       status: 'success',
       data: {
@@ -306,6 +329,10 @@ export const leaveQueue = async (
     }
 
     const queueEntry = queueEntries[0] as any;
+    // Ensure only owner or manager/admin can remove the queue entry
+    if (req.user && req.user.role === 'customer' && req.user.id !== queueEntry.user_id) {
+      return next(new AppError('You do not have permission to remove this queue entry', 403));
+    }
 
     // Update queue status to 'cancelled'
     await pool.query(
@@ -326,6 +353,12 @@ export const leaveQueue = async (
       status: 'success',
       data: null,
     });
+    try {
+      const io = getIO();
+      io.emit('queue:leave', { id });
+    } catch (e) {
+      // ignore
+    }
   } catch (err) {
     next(err);
   }

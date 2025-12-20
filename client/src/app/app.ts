@@ -1,11 +1,13 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, provideRouter } from '@angular/router';
 import { TableListComponent } from './components/table-list/table-list';
+import { HeaderComponent } from './components/header/header';
+import { routes } from './app.routes';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, TableListComponent],
+  imports: [RouterOutlet, TableListComponent, HeaderComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -13,3 +15,6 @@ import { TableListComponent } from './components/table-list/table-list';
 export class AppComponent {
   title = 'Smart Restaurant';
 }
+
+// Provide router in bootstrap/main or here for standalone purposes
+export const appProviders = [provideRouter(routes)];

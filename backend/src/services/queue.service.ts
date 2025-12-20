@@ -76,7 +76,7 @@ export class QueueService {
     };
   }
 
-  async cancelQueueEntry(entryId: number, userId: number, isAdmin: boolean = false): Promise<boolean> {
+  async cancelQueueEntry(entryId: number, userId: number, isAdmin = false): Promise<boolean> {
     const queueEntry = await queueRepository.findById(entryId);
     if (!queueEntry) {
       throw new Error('Queue entry not found');

@@ -6,16 +6,26 @@ export async function clearTestData() {
     await pool.query('DELETE FROM reservations');
   } catch (e) {
     // ignore if table doesn't exist yet
+    // log for visibility while running tests
+    // console.warn('clearTestData reservations error', e);
   }
   try {
     await pool.query('DELETE FROM queue');
-  } catch (e) {}
+  } catch (e) { console.warn('clearTestData queue error', e); }
   try {
     await pool.query("DELETE FROM tables WHERE table_number NOT IN (1,2,3,4,5)");
-  } catch (e) {}
+  } catch (e) { console.warn('clearTestData tables error', e); }
   try {
     await pool.query("DELETE FROM users WHERE email NOT LIKE 'admin@%'");
-  } catch (e) {}
+  } catch (e) { console.warn('clearTestData users error', e); }
+}
+
+export async function closePool() {
+  try {
+    await pool.end();
+  } catch (e) {
+    // ignore
+  }
 }
 
 export async function seedTables() {

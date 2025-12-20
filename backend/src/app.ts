@@ -16,7 +16,13 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-app.use(cors());
+// Enable CORS with credentials for the frontend dev server
+app.use(
+  cors({
+    origin: process.env.FRONTEND_ORIGIN || 'http://localhost:4200',
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

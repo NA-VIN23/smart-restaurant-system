@@ -19,6 +19,8 @@ describeOrSkip('Reservation integration tests', () => {
 
   afterAll(async () => {
     await clearTestData();
+    const { closePool } = await import('../test-utils/db-utils');
+    await closePool();
   });
 
   // Ensure each test runs with a fresh DB state
@@ -37,6 +39,15 @@ describeOrSkip('Reservation integration tests', () => {
     const res = await request(app).post('/api/v1/reservations').set('Authorization', `Bearer ${customerToken}`).send({ user_id: customerId, table_id: tableId, reservation_time: reservationTime, party_size: 2 });
     expect(res.status).toBe(201);
     expect(res.body.data.reservation).toBeDefined();
+  });
+
+  test('customer cannot create reservation for another user', async () => {
+    // create a different user
+    const { user: otherUser } = await createUserAndGetToken({ name: `Other${Date.now()}`, email: `other+${Date.now()}@test.com`, password: 'password' });
+
+    const reservationTime = new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString();
+    const res = await request(app).post('/api/v1/reservations').set('Authorization', `Bearer ${customerToken}`).send({ user_id: otherUser.id, table_id: tableId, reservation_time: reservationTime, party_size: 2 });
+    expect(res.status).toBe(403);
   });
 
   test('cannot double book same table/time', async () => {

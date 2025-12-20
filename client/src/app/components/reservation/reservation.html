@@ -1,1 +1,27 @@
-<p>reservation works!</p>
+<div class="reservation-container">
+	<h2>Make a reservation</h2>
+	<form [formGroup]="form" (ngSubmit)="findTables()">
+		<label>Date</label>
+		<input type="date" formControlName="date" />
+
+		<label>Time</label>
+		<input type="time" formControlName="time" />
+
+		<label>Party size</label>
+		<input type="number" formControlName="party_size" />
+
+		<button type="button" (click)="findTables()">Find Tables</button>
+	</form>
+
+	<div *ngIf="availableTables.length > 0">
+		<h3>Available tables</h3>
+		<ul>
+			<li *ngFor="let t of availableTables">
+				Table {{ t.table_number }} (capacity {{ t.capacity }})
+				<button (click)="book(t.id)">Book</button>
+			</li>
+		</ul>
+	</div>
+
+	<div class="error" *ngIf="error">{{ error }}</div>
+</div>

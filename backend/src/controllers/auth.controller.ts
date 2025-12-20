@@ -6,6 +6,7 @@ import { AppError } from '../middleware/error.middleware';
 import { User } from '../models/user.model';
 
 // Extend the Express Request interface to include the user property
+/* eslint-disable @typescript-eslint/no-namespace */
 declare global {
   namespace Express {
     interface Request {
@@ -13,6 +14,7 @@ declare global {
     }
   }
 }
+/* eslint-enable @typescript-eslint/no-namespace */
 
 
 const signToken = (id: number, role: string): string => {
@@ -189,6 +191,20 @@ export const protect = async (
   }
 };
 
+  export const getMe = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    // Returns current authenticated user (without password)
+    try {
+      if (!req.user) {
+        return next(new AppError('You are not logged in! Please log in to get access.', 401));
+      }
+      const user = { ...req.user } as any;
+      delete user.password;
+      res.status(200).json({ status: 'success', data: { user } });
+    } catch (err) {
+      next(err as any);
+    }
+  };
+
 export const restrictTo = (...roles: string[]) => {
   return (req: Request, _res: Response, next: NextFunction) => {
     // Ensure req.user exists and has role
@@ -200,4 +216,9 @@ export const restrictTo = (...roles: string[]) => {
 
     next();
   };
+};
+
+export const logout = async (_req: Request, res: Response): Promise<void> => {
+  res.clearCookie('jwt');
+  res.status(200).json({ status: 'success', message: 'Logged out' });
 };

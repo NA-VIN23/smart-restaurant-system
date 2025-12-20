@@ -14,7 +14,7 @@
     "db:migrate": "ts-node src/migrations/migrate.ts",
     "db:docker:up": "docker run -d --name rms-mysql -e MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-example} -e MYSQL_DATABASE=${DB_NAME:-restaurant_management} -p 3306:3306 mysql:8.0 --default-authentication-plugin=mysql_native_password",
     "db:docker:down": "docker rm -f rms-mysql || true",
-    "test:integration": "cross-env RUN_INTEGRATION=true npm test --silent"
+    "test:integration": "cross-env RUN_INTEGRATION=true jest --runInBand --silent"
   },
   "dependencies": {
     "@types/bcryptjs": "^2.4.6",

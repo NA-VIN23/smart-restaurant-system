@@ -42,6 +42,8 @@ router.get('/user/:userId', param('userId').isInt().withMessage('userId must be 
 router.patch(
   '/:id/status',
   authController.restrictTo('manager', 'admin'),
+  body('status').isIn(['confirmed','seated','completed','cancelled','no-show']).withMessage('Invalid status'),
+  runValidation,
   reservationController.updateReservationStatus
 );
 
