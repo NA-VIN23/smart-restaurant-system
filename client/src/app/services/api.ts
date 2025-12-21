@@ -33,7 +33,18 @@ export class ApiService {
     }
 
     // 5. Join Queue (We will add this logic later)
-    joinQueue(userId: number, partySize: number) {
-        return this.http.post(`${this.apiUrl}/queue/join`, { userId, partySize });
+    // 5. Join Queue
+    joinQueue(data: { userId?: number, name?: string, partySize: number }): Observable<any> {
+        return this.http.post(`${this.apiUrl}/queue/join`, data);
+    }
+
+    // 6. Get Queue
+    getQueue(): Observable<any[]> {
+        return this.http.get<any[]>(`${this.apiUrl}/queue`);
+    }
+
+    // 7. Update Queue Status
+    updateQueueStatus(id: number, status: 'seated' | 'cancelled'): Observable<any> {
+        return this.http.put(`${this.apiUrl}/queue/${id}/status`, { status });
     }
 }

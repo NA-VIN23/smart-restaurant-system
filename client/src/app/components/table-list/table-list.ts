@@ -1,30 +1,84 @@
+
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common'; // Required for the loop (*ngFor)
-import { ApiService } from '../../services/api'; // Connecting to your Backend
-import { RestaurantTable } from '../../models/types'; // Using your Contract
+import { CommonModule } from '@angular/common';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ApiService } from '../../services/api';
+import { JoinQueueDialogComponent } from '../join-queue-dialog/join-queue-dialog';
+import { RestaurantTable } from '../../models/types';
 
 @Component({
   selector: 'app-table-list',
   standalone: true,
-  imports: [CommonModule], // <--- Must include this to use *ngFor in HTML
-  templateUrl: './table-list.html',
-  styleUrl: './table-list.css'
+  imports: [
+    CommonModule,
+    MatGridListModule,
+    MatCardModule,
+    MatIconModule,
+    MatButtonModule,
+    MatDialogModule
+  ],
+  template: `
+    <div class="container">
+      <div class="header">
+        <h2>Available Tables</h2>
+        <button mat-raised-button color="accent" (click)="openJoinQueueDialog()">
+          <mat-icon>hourglass_empty</mat-icon> Join Waitlist
+        </button>
+      </div>
+
+      <div class="grid">
+        <mat-card *ngFor="let table of tables" [class.available]="table.status === 'Available'">
+          <mat-card-header>
+            <mat-card-title>Table {{table.table_number}}</mat-card-title>
+            <mat-card-subtitle>{{table.type}} • {{table.capacity}} Seats</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <p class="status" [ngClass]="table.status.toLowerCase()">{{table.status}}</p>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  `,
+  styles: [`
+    .container { padding: 20px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .grid { display: flex; flex-wrap: wrap; gap: 20px; }
+    mat-card { width: 200px; }
+    .status { font-weight: bold; text-align: center; margin-top: 10px; }
+    .available { color: green; }
+    .occupied { color: red; }
+    .reserved { color: orange; }
+    mat-card.available { border-left: 5px solid green; }
+  `]
 })
 export class TableListComponent implements OnInit {
-  tables: RestaurantTable[] = []; // Store the data here
+  tables: RestaurantTable[] = [];
 
-  // Inject the API Service
-  constructor(private api: ApiService, private cdr: ChangeDetectorRef) { }
+  constructor(private api: ApiService, private dialog: MatDialog, private cdr: ChangeDetectorRef) { }
 
-  // This runs automatically when the page loads
   ngOnInit() {
-    this.api.getTables().subscribe({
-      next: (data) => {
-        this.tables = data; // Save the data from the server
-        console.log('Tables loaded:', data);
-        this.cdr.detectChanges(); // Manually force update
-      },
-      error: (err) => console.error('Error loading tables:', err)
+    this.api.getTables().subscribe(data => {
+      this.tables = data;
+      this.cdr.detectChanges();
+    });
+  }
+
+  openJoinQueueDialog() {
+    const dialogRef = this.dialog.open(JoinQueueDialogComponent, {
+      width: '300px'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.api.joinQueue(result).subscribe(
+          () => alert('Joined queue successfully!'),
+          err => alert('Error joining queue')
+        );
+      }
     });
   }
 }

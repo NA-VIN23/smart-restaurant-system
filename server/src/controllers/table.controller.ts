@@ -16,17 +16,23 @@ export const getTables = async (req: Request, res: Response) => {
 
 // 2. Add a new table
 export const addTable = async (req: Request, res: Response) => {
-    const { table_number, capacity, type } = req.body;
+    const { table_number, capacity, type, status } = req.body;
 
     if (!table_number || !capacity) {
         res.status(400).json({ message: 'Table number and capacity are required' });
         return;
     }
 
+    const cap = parseInt(capacity);
+    if (cap > 20) {
+        res.status(400).json({ message: 'Capacity cannot exceed 20' });
+        return;
+    }
+
     try {
         const [result] = await db.query<ResultSetHeader>(
-            'INSERT INTO restaurant_tables (table_number, capacity, type) VALUES (?, ?, ?)',
-            [table_number, capacity, type || 'Regular']
+            'INSERT INTO restaurant_tables (table_number, capacity, type, status) VALUES (?, ?, ?, ?)',
+            [table_number, cap, type || 'Regular', status || 'Available']
         );
         res.status(201).json({ message: 'Table added successfully', id: result.insertId });
     } catch (error: any) {
@@ -42,12 +48,18 @@ export const addTable = async (req: Request, res: Response) => {
 // 3. Update a table
 export const updateTable = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { capacity, type, status } = req.body;
+    const { table_number, capacity, type, status } = req.body;
+
+    const cap = parseInt(capacity);
+    if (cap > 20) {
+        res.status(400).json({ message: 'Capacity cannot exceed 20' });
+        return;
+    }
 
     try {
         await db.query(
-            'UPDATE restaurant_tables SET capacity = ?, type = ?, status = ? WHERE id = ?',
-            [capacity, type, status, id]
+            'UPDATE restaurant_tables SET table_number = ?, capacity = ?, type = ?, status = ? WHERE id = ?',
+            [table_number, cap, type, status, id]
         );
         res.json({ message: 'Table updated successfully' });
     } catch (error) {

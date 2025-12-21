@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TableList } from './table-list';
+import { TableListComponent } from './table-list';
 
 describe('TableList', () => {
-  let component: TableList;
-  let fixture: ComponentFixture<TableList>;
+  let component: TableListComponent;
+  let fixture: ComponentFixture<TableListComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TableList]
+      imports: [TableListComponent]
     })
-    .compileComponents();
+      .compileComponents();
 
-    fixture = TestBed.createComponent(TableList);
+    fixture = TestBed.createComponent(TableListComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
