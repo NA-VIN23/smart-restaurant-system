@@ -42,4 +42,9 @@ export class AuthService {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         return user.role || '';
     }
+
+    getUserId(): number | null {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        return user.id || null;
+    }
 }

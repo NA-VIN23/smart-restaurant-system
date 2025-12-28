@@ -6,6 +6,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 import { ApiService } from '../../services/api';
 import { JoinQueueDialogComponent } from '../join-queue-dialog/join-queue-dialog';
 import { RestaurantTable } from '../../models/types';
@@ -19,7 +21,8 @@ import { RestaurantTable } from '../../models/types';
     MatCardModule,
     MatIconModule,
     MatButtonModule,
-    MatDialogModule
+    MatDialogModule,
+    MatSnackBarModule
   ],
   template: `
     <div class="container">
@@ -58,7 +61,13 @@ import { RestaurantTable } from '../../models/types';
 export class TableListComponent implements OnInit {
   tables: RestaurantTable[] = [];
 
-  constructor(private api: ApiService, private dialog: MatDialog, private cdr: ChangeDetectorRef) { }
+  constructor(
+    private api: ApiService,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar,
+    private cdr: ChangeDetectorRef,
+    private router: Router
+  ) { }
 
   ngOnInit() {
     this.api.getTables().subscribe(data => {
@@ -74,10 +83,16 @@ export class TableListComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.api.joinQueue(result).subscribe(
-          () => alert('Joined queue successfully!'),
-          err => alert('Error joining queue')
-        );
+        this.api.joinQueue(result).subscribe({
+          next: () => {
+            this.snackBar.open('You have joined the waitlist!', 'Close', { duration: 3000 });
+            this.router.navigate(['/queue']);
+          },
+          error: (err) => {
+            this.snackBar.open('Error joining queue. Please try again.', 'Close', { duration: 3000 });
+            console.error(err);
+          }
+        });
       }
     });
   }

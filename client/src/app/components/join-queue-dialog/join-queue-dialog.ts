@@ -6,19 +6,21 @@ import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
-    selector: 'app-join-queue-dialog',
-    standalone: true,
-    imports: [
-        CommonModule,
-        FormsModule,
-        MatDialogModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatButtonModule
-    ],
-    template: `
+  selector: 'app-join-queue-dialog',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatSelectModule
+  ],
+  template: `
     <h2 mat-dialog-title>Join Waitlist</h2>
     <mat-dialog-content>
       <form>
@@ -31,6 +33,14 @@ import { MatButtonModule } from '@angular/material/button';
           <mat-label>Party Size</mat-label>
           <input matInput type="number" [(ngModel)]="data.partySize" name="partySize" required min="1" max="10">
         </mat-form-field>
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Type</mat-label>
+          <mat-select [(ngModel)]="data.customerType" name="customerType">
+            <mat-option value="Regular">Regular</mat-option>
+            <mat-option value="VIP">VIP</mat-option>
+          </mat-select>
+        </mat-form-field>
       </form>
     </mat-dialog-content>
     <mat-dialog-actions align="end">
@@ -38,12 +48,12 @@ import { MatButtonModule } from '@angular/material/button';
       <button mat-raised-button color="primary" [mat-dialog-close]="data" [disabled]="!data.name || !data.partySize">Join</button>
     </mat-dialog-actions>
   `,
-    styles: [`
+  styles: [`
     .full-width { width: 100%; margin-bottom: 20px; }
   `]
 })
 export class JoinQueueDialogComponent {
-    data = { name: '', partySize: 1 };
+  data = { name: '', partySize: 1, customerType: 'Regular' };
 
-    constructor(public dialogRef: MatDialogRef<JoinQueueDialogComponent>) { }
+  constructor(public dialogRef: MatDialogRef<JoinQueueDialogComponent>) { }
 }

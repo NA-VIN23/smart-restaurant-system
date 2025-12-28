@@ -71,7 +71,7 @@ export class LoginComponent {
         if (res.user?.role === 'Manager') {
           this.router.navigate(['/manager']);
         } else {
-          this.router.navigate(['/tables']);
+          this.router.navigate(['/home']);
         }
       },
       error: (err: any) => {

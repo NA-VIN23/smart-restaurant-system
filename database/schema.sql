@@ -1,9 +1,9 @@
-[cite_start]-- STRICT 2-TABLE SCHEMA [cite: 178]
+
 CREATE DATABASE IF NOT EXISTS restaurant_db;
 USE restaurant_db;
 
 -- 1. Users Table (Handles Customer, Manager, Admin)
-[cite_start]-- Source: PDF Section 6 [cite: 179-184]
+
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
