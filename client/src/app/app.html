@@ -1,25 +1,56 @@
-<<<<<<< HEAD
-<app-header></app-header>
-<router-outlet></router-outlet>
-=======
-<mat-toolbar color="primary">
-    <span>Smart Restaurant</span>
-    <span class="spacer"></span>
+<style>
+  :host { display:block; }
+  app-navbar { display:block; }
+  main { padding: 16px; max-width: 1100px; margin: 0 auto; }
+</style>
 
-    <a mat-button routerLink="/tables">Tables</a>
-    <a mat-button routerLink="/queue">Queue</a>
+<app-navbar></app-navbar>
 
-    <a mat-button *ngIf="authService.getUserRole() === 'Manager'" routerLink="/manager">Dashboard</a>
+<main>
+  <router-outlet></router-outlet>
+</main>
+<style>
+  :host { display:block; }
+  app-navbar { display:block; }
+  main { padding: 16px; max-width: 1100px; margin: 0 auto; }
+</style>
 
-    <ng-container *ngIf="!authService.isLoggedIn()">
-        <a mat-button routerLink="/login">Login</a>
-        <a mat-button routerLink="/register">Register</a>
-    </ng-container>
+<app-navbar></app-navbar>
 
-    <button mat-button *ngIf="authService.isLoggedIn()" (click)="logout()">Logout</button>
-</mat-toolbar>
+<main>
+  <router-outlet></router-outlet>
+</main>
+<style>
+  :host { display:block; }
+  app-navbar { display:block; }
+  main { padding: 16px; max-width: 1100px; margin: 0 auto; }
+</style>
 
-<div class="content">
-    <router-outlet></router-outlet>
-</div>
->>>>>>> origin/main
+<app-navbar></app-navbar>
+
+<main>
+  <router-outlet></router-outlet>
+</main>
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+<!-- * * * * * * * * * * * The content below * * * * * * * * * * * -->
+<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * -->
+<!-- * * * * * * * * * * and can be replaced.  * * * * * * * * * * -->
+<style>
+  :host { display:block; }
+  app-navbar { display:block; }
+  main { padding: 16px; max-width: 1100px; margin: 0 auto; }
+</style>
+
+<app-navbar></app-navbar>
+
+<main>
+  <router-outlet></router-outlet>
+</main>
+<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * * -->
+<!-- * * * * * * * * * * and can be replaced.  * * * * * * * * * * * -->
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+<!-- * * * * * * * * * * End of Placeholder  * * * * * * * * * * * * -->
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+
+
+ 

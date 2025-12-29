@@ -1,0 +1,23 @@
+:host {
+	display: block;
+}
+
+/* Navbar styling to ensure consistent layout across pages */
+.nav {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+	padding: 12px 16px;
+	background: var(--mat-sys-surface-container);
+	box-shadow: var(--mat-sys-level1);
+}
+
+main {
+	padding: 16px;
+	max-width: 1100px;
+	margin: 0 auto;
+}
+
+.full { width: 100%; }
+
+.table-list .cards { margin-top: 12px; }

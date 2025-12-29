@@ -1,0 +1,27 @@
+<div class="queue">
+  <mat-card>
+    <mat-card-title>Join the Queue</mat-card-title>
+    <mat-card-content>
+      <mat-form-field appearance="outline" style="width:120px; margin-right:12px;">
+        <mat-label>Capacity</mat-label>
+        <input matInput type="number" min="1" [(ngModel)]="capacityNeeded" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" style="width:160px;">
+        <mat-label>Type</mat-label>
+        <mat-select [(ngModel)]="typePreference">
+          <mat-option [value]="null">Any</mat-option>
+          <mat-option value="Regular">Regular</mat-option>
+          <mat-option value="VIP">VIP</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-raised-button color="primary" (click)="join()">Join</button>
+    </mat-card-actions>
+    <mat-card-content *ngIf="position() !== null">
+      Your position: {{ position() }}
+    </mat-card-content>
+  </mat-card>
+</div>
+  

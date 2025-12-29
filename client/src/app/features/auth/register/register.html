@@ -1,0 +1,25 @@
+<mat-card class="register-card">
+	<h2>Register</h2>
+		<form (ngSubmit)="submit()">
+		<mat-form-field appearance="outline" class="full">
+			<mat-label>Name</mat-label>
+				<input matInput [(ngModel)]="name" name="name" required />
+		</mat-form-field>
+		<mat-form-field appearance="outline" class="full">
+			<mat-label>Email</mat-label>
+				<input matInput [(ngModel)]="email" name="email" required />
+		</mat-form-field>
+		<mat-form-field appearance="outline" class="full">
+			<mat-label>Password</mat-label>
+				<input matInput [(ngModel)]="password" name="password" type="password" required />
+		</mat-form-field>
+			<mat-form-field appearance="outline" class="full">
+				<mat-label>Role</mat-label>
+				<mat-select [(ngModel)]="role" name="role">
+					<mat-option value="Customer">Customer</mat-option>
+					<mat-option value="Manager">Manager</mat-option>
+				</mat-select>
+			</mat-form-field>
+		<button mat-raised-button color="primary">Register</button>
+	</form>
+</mat-card>

@@ -1,0 +1,9 @@
+<mat-card class="table-card">
+	<mat-card-title>{{ table?.table_number }} — {{ table?.type }}</mat-card-title>
+	<mat-card-content>
+		Capacity: {{ table?.capacity }} — Status: {{ table?.status }}
+	</mat-card-content>
+	<mat-card-actions>
+		<button mat-button color="primary" (click)="join()">Join Queue</button>
+	</mat-card-actions>
+</mat-card>

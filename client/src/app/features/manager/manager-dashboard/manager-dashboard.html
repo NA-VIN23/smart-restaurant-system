@@ -1,0 +1,20 @@
+<div class="manager-dashboard">
+  <h2>Manager Dashboard</h2>
+  <div class="cards">
+    <ng-container *ngFor="let t of tables()">
+      <mat-card>
+        <mat-card-title>Table {{ t.table_number }}</mat-card-title>
+        <mat-card-content>
+          <div>Status: {{ t.status }}</div>
+          <div *ngIf="t.current_customer_name">Customer: {{ t.current_customer_name }}</div>
+          <div *ngIf="t.queue_position">Queue Pos: {{ t.queue_position }}</div>
+          <div *ngIf="t.reservation_time">Reservation: {{ t.reservation_time }}</div>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-button color="primary" *ngIf="t.status === 'Reserved' || t.queue_position" (click)="seat(t)">Seat</button>
+          <button mat-button color="warn" *ngIf="t.status === 'Occupied'" (click)="vacate(t)">Vacate</button>
+        </mat-card-actions>
+      </mat-card>
+    </ng-container>
+  </div>
+</div>

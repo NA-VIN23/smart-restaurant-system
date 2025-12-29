@@ -1,0 +1,16 @@
+<div class="table-list">
+  <h2>Available Tables</h2>
+  <div class="cards">
+    <ng-container *ngFor="let t of tables()">
+      <mat-card class="table-card">
+        <mat-card-title>Table {{ t.table_number }} — {{ t.type }}</mat-card-title>
+        <mat-card-content>
+          Capacity: {{ t.capacity }} — Status: {{ t.status }}
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-button color="primary" (click)="joinQueue(t)">Join Queue</button>
+        </mat-card-actions>
+      </mat-card>
+    </ng-container>
+    </div>
+    </div>

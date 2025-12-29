@@ -1,42 +1,27 @@
-<<<<<<< HEAD
 import { Routes } from '@angular/router';
-import { TableListComponent } from './components/table-list/table-list';
-import { QueueManagementComponent } from './components/queue-management/queue-management';
-import { ReservationComponent } from './components/reservation/reservation';
-import { ManagerDashboardComponent } from './components/manager-dashboard/manager-dashboard';
-import { LoginComponent } from './components/login/login';
-import { SignupComponent } from './components/signup/signup';
-import { authGuard } from './guards/auth.guard';
+import { TableList } from './features/tables/table-list/table-list';
+import { QueueManagement } from './features/queue/queue-management/queue-management';
+import { ReservationForm } from './features/reservation/reservation-form/reservation-form';
+import { ManagerDashboard } from './features/manager/manager-dashboard/manager-dashboard';
+import { Login } from './features/auth/login/login';
+import { NotAuthorized } from './features/auth/not-authorized/not-authorized';
+import { authGuard } from './core/guards/auth-guard';
+import { roleGuard } from './core/guards/role-guard';
+import { Navbar } from './shared/components/navbar/navbar';
 
 export const routes: Routes = [
 	{ path: '', redirectTo: 'tables', pathMatch: 'full' },
-	{ path: 'tables', component: TableListComponent },
-	{ path: 'queue', component: QueueManagementComponent },
-	{ path: 'reservation', component: ReservationComponent },
-	{ path: 'manager/dashboard', component: ManagerDashboardComponent, canActivate: [authGuard], data: { roles: ['manager', 'admin'] } },
-	{ path: 'login', component: LoginComponent },
-	{ path: 'signup', component: SignupComponent },
-	{ path: 'not-authorized', loadComponent: () => import('./components/not-authorized/not-authorized').then(m => m.NotAuthorizedComponent) }
-=======
-
-import { Routes } from '@angular/router';
-import { TableListComponent } from './components/table-list/table-list';
-import { QueueManagement } from './components/queue-management/queue-management';
-import { LoginComponent } from './components/login/login';
-import { RegisterComponent } from './components/register/register';
-import { authGuard } from './guards/auth.guard';
-import { ManagerDashboard } from './components/manager-dashboard/manager-dashboard';
-
-export const routes: Routes = [
-    { path: '', redirectTo: '/tables', pathMatch: 'full' },
-    { path: 'login', component: LoginComponent },
-    { path: 'register', component: RegisterComponent },
-    { path: 'tables', component: TableListComponent },
-    { path: 'queue', component: QueueManagement },
-    {
-        path: 'manager',
-        component: ManagerDashboard,
-        canActivate: [authGuard]
-    }
->>>>>>> origin/main
+	{ path: 'tables', component: TableList },
+	{ path: 'queue', component: QueueManagement },
+	{ path: 'reservation', component: ReservationForm },
+	{
+		path: 'manager/dashboard',
+		component: ManagerDashboard,
+		canActivate: [authGuard, roleGuard],
+		data: { role: 'Manager' }
+	},
+	    { path: 'login', component: Login },
+	    { path: 'not-authorized', component: NotAuthorized },
+	{ path: '**', redirectTo: 'tables' }
 ];
+

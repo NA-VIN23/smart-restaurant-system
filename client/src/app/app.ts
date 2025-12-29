@@ -1,49 +1,29 @@
-
-import { Component } from '@angular/core';
-<<<<<<< HEAD
-import { RouterOutlet, provideRouter } from '@angular/router';
-import { TableListComponent } from './components/table-list/table-list';
-import { HeaderComponent } from './components/header/header';
-import { routes } from './app.routes';
-=======
-import { RouterOutlet, RouterModule, Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { AuthService } from './services/auth.service';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatButtonModule } from '@angular/material/button';
->>>>>>> origin/main
+import { Component, signal, OnInit } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { Navbar } from './shared/components/navbar/navbar';
+import { AuthService } from './core/services/auth';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AuthInterceptorClass } from './core/interceptors/auth-interceptor-class';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
-<<<<<<< HEAD
-  imports: [RouterOutlet, TableListComponent, HeaderComponent],
-=======
-  imports: [
-    CommonModule,
-    RouterOutlet,
-    RouterModule,
-    MatToolbarModule,
-    MatButtonModule
-  ],
->>>>>>> origin/main
+  imports: [RouterOutlet, Navbar],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrls: ['./app.scss'],
+  providers: [
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptorClass, multi: true }
+  ]
 })
-export class AppComponent {
-  title = 'Smart Restaurant';
-<<<<<<< HEAD
-}
+export class App implements OnInit {
+  protected readonly title = signal('client');
 
-// Provide router in bootstrap/main or here for standalone purposes
-export const appProviders = [provideRouter(routes)];
-=======
+  constructor(private auth: AuthService) {}
 
-  constructor(public authService: AuthService, private router: Router) { }
-
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/login']);
+  ngOnInit() {
+    // If there's a token, attempt to load the profile so UI reflects logged-in state on refresh
+    if (localStorage.getItem('token')) {
+      // fire-and-forget; components can react to auth.user
+      this.auth.loadProfile().subscribe({ error: () => { /* ignore */ } });
+    }
   }
 }
->>>>>>> origin/main

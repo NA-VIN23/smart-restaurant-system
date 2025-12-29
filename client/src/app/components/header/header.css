@@ -1,4 +1,0 @@
-.app-header { display:flex; gap:1rem; padding:1rem; background:#fafafa; align-items:center }
-.app-header .spacer { flex:1 }
-.app-header a { text-decoration:none }
-.app-header .user { margin-right: .5rem; font-weight:600 }

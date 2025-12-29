@@ -1,0 +1,22 @@
+<div class="reservation">
+  <mat-card>
+    <mat-card-title>Book a table</mat-card-title>
+    <mat-card-content>
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Table</mat-label>
+        <select matNativeControl [(ngModel)]="tableId" name="table">
+          <option [ngValue]="null">Select a table</option>
+          <option *ngFor="let t of tables" [ngValue]="t.id">{{ t.table_number }} — {{ t.capacity }} ({{ t.type }})</option>
+        </select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Reservation time</mat-label>
+        <input matInput placeholder="YYYY-MM-DD HH:mm" [(ngModel)]="time" name="time" />
+      </mat-form-field>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-raised-button color="primary" (click)="submit()">Book</button>
+    </mat-card-actions>
+  </mat-card>
+</div>
