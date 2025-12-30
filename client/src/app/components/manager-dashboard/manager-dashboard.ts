@@ -84,13 +84,85 @@ import { RestaurantTable } from '../../models/types';
         <mat-tab label="Queue">
              <app-queue-management (customerSeated)="loadTables()"></app-queue-management>
         </mat-tab>
+
+        <!-- Reservations Tab -->
+        <mat-tab label="Reservations">
+          
+          <div class="tab-actions">
+              <button mat-flat-button color="warn" (click)="clearApproved()">
+                  <mat-icon>delete_sweep</mat-icon> Reset / Clear Approved
+              </button>
+          </div>
+
+          <table mat-table [dataSource]="reservations" class="mat-elevation-z8">
+             <!-- Name Column -->
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef> Name </th>
+              <td mat-cell *matCellDef="let res"> {{res.name}} </td>
+            </ng-container>
+
+            <!-- Size Column -->
+            <ng-container matColumnDef="party_size">
+              <th mat-header-cell *matHeaderCellDef> Size </th>
+              <td mat-cell *matCellDef="let res"> {{res.party_size}} </td>
+            </ng-container>
+
+            <!-- Type Column -->
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef> Type </th>
+              <td mat-cell *matCellDef="let res"> {{res.customer_type}} </td>
+            </ng-container>
+            
+            <!-- Date Column -->
+            <ng-container matColumnDef="date">
+              <th mat-header-cell *matHeaderCellDef> Date </th>
+              <td mat-cell *matCellDef="let res"> {{res.reservation_date | date}} </td>
+            </ng-container>
+
+            <!-- Time Column -->
+            <ng-container matColumnDef="time">
+              <th mat-header-cell *matHeaderCellDef> Time </th>
+              <td mat-cell *matCellDef="let res"> {{res.reservation_time}} </td>
+            </ng-container>
+
+            <!-- Status Column -->
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef> Status </th>
+              <td mat-cell *matCellDef="let res"> 
+                <span [style.color]="getStatusColor(res.status)">{{res.status}}</span>
+              </td>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef> Actions </th>
+              <td mat-cell *matCellDef="let res">
+                <button mat-icon-button color="primary" *ngIf="res.status === 'Pending'" (click)="updateStatus(res, 'Approved')" title="Approve">
+                  <mat-icon>check_circle</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" *ngIf="res.status === 'Pending'" (click)="updateStatus(res, 'Declined')" title="Decline">
+                  <mat-icon>cancel</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="reservationColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: reservationColumns;"></tr>
+          </table>
+
+          <div *ngIf="reservations.length === 0" class="no-data">
+            No reservations found.
+          </div>
+
+        </mat-tab>
       </mat-tab-group>
     </div>
   `,
   styles: [`
     .dashboard-container { padding: 20px; }
     .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    table { width: 100%; margin-top: 20px; }
+    .tab-actions { margin-top: 20px; display: flex; justify-content: flex-end; }
+    table { width: 100%; margin-top: 10px; }
     .no-data { padding: 20px; text-align: center; color: #666; font-style: italic; }
   `]
 })
@@ -102,6 +174,7 @@ export class ManagerDashboard implements OnInit {
 
   ngOnInit() {
     this.loadTables();
+    this.loadReservations();
   }
 
   loadTables() {
@@ -133,6 +206,43 @@ export class ManagerDashboard implements OnInit {
   deleteTable(table: RestaurantTable) {
     if (confirm(`Are you sure you want to delete Table ${table.table_number}?`)) {
       this.api.deleteTable(table.id).subscribe(() => this.loadTables());
+    }
+  }
+
+  // --- RESERVATIONS ---
+  reservations: any[] = [];
+  reservationColumns: string[] = ['name', 'party_size', 'type', 'date', 'time', 'status', 'actions'];
+
+  loadReservations() {
+    this.api.getReservations().subscribe(data => {
+      this.reservations = data;
+      this.cdr.detectChanges();
+    });
+  }
+
+  updateStatus(reservation: any, status: string) {
+    this.api.updateReservationStatus(reservation.id, status).subscribe(() => {
+      this.loadReservations();
+    });
+  }
+
+  getStatusColor(status: string): string {
+    switch (status) {
+      case 'Approved': return 'green';
+      case 'Declined': return 'red';
+      default: return 'orange';
+    }
+  }
+
+  clearApproved() {
+    if (confirm('Are you sure? This will delete all APPROVED reservations to reset testing data.')) {
+      this.api.clearApprovedReservations().subscribe({
+        next: () => {
+          this.loadReservations();
+          // alert('Cleared approved reservations.');
+        },
+        error: (err) => console.error(err)
+      });
     }
   }
 }

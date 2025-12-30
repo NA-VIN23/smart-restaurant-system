@@ -84,4 +84,26 @@ export class ApiService {
         if (ids.length === 0) return new Observable(obs => obs.next([]));
         return this.http.get<any[]>(`${this.apiUrl}/queue/my-status?query_ids=${ids.join(',')}`);
     }
+
+    // --- RESERVATIONS ---
+
+    createReservation(data: any): Observable<any> {
+        return this.http.post(`${this.apiUrl}/reservation`, data);
+    }
+
+    getUserReservations(): Observable<any[]> {
+        return this.http.get<any[]>(`${this.apiUrl}/reservation/my-reservations`);
+    }
+
+    getReservations(): Observable<any[]> {
+        return this.http.get<any[]>(`${this.apiUrl}/reservation`);
+    }
+
+    updateReservationStatus(id: number, status: string): Observable<any> {
+        return this.http.put(`${this.apiUrl}/reservation/${id}/status`, { status });
+    }
+
+    clearApprovedReservations(): Observable<any> {
+        return this.http.delete(`${this.apiUrl}/reservation/approved`);
+    }
 }

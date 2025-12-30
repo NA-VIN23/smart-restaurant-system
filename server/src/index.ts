@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import tableRoutes from './routes/table.routes';
 import queueRoutes from './routes/queue.routes';
+import reservationRoutes from './routes/reservation.routes';
 import authRoutes from './routes/auth.routes';
 dotenv.config();
 
@@ -17,6 +18,7 @@ app.use(express.json());
 // This creates the URL: http://localhost:3000/api/tables
 app.use('/api/tables', tableRoutes);
 app.use('/api/queue', queueRoutes);
+app.use('/api/reservation', reservationRoutes);
 app.use('/api/auth', authRoutes);
 
 // Start Server
