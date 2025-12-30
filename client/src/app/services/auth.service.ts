@@ -32,6 +32,7 @@ export class AuthService {
     logout() {
         sessionStorage.removeItem('token');
         sessionStorage.removeItem('user');
+        sessionStorage.removeItem('guestQueueId'); // Clear guest queue entries preventing leakage
     }
 
     isLoggedIn(): boolean {

@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { JoinQueueDialogComponent } from '../join-queue-dialog/join-queue-dialog';
+import { SuccessDialogComponent } from '../success-dialog/success-dialog';
 import { ApiService } from '../../services/api';
 import { AuthService } from '../../services/auth.service';
 
@@ -166,8 +167,16 @@ export class CustomerHomeComponent {
               sessionStorage.setItem('guestQueueId', JSON.stringify(ids));
               console.log('Set guestQueueId:', ids);
             }
-            this.snackBar.open('You have joined the waitlist!', 'Close', { duration: 3000 });
-            this.router.navigate(['/queue']); // Redirect to Status Page
+            this.dialog.open(SuccessDialogComponent, {
+              width: '350px',
+              data: {
+                title: 'Joined!',
+                message: 'Success! You have been added to the waitlist.',
+                buttonText: 'View Queue'
+              }
+            }).afterClosed().subscribe(() => {
+              this.router.navigate(['/queue']);
+            });
           },
           error: (err) => {
             console.error(err);

@@ -5,9 +5,12 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatDialog } from '@angular/material/dialog';
 import { ApiService } from '../../services/api';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
+import { SeatedDialogComponent } from '../seated-dialog/seated-dialog';
+import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog';
 
 @Component({
   selector: 'app-queue-status',
@@ -53,6 +56,11 @@ import { Router } from '@angular/router';
                         <span>Estimated Wait: <strong>{{entry.estimatedWaitTime}} mins</strong></span>
                     </div>
                 
+                    <div class="info-row" *ngIf="entry.table_id">
+                         <mat-icon>check_circle</mat-icon>
+                         <span>Seated!</span>
+                    </div>
+
                     <button mat-stroked-button color="warn" (click)="leaveQueue(entry.id)">Leave This Queue</button>
                 </mat-card-content>
             </mat-card>
@@ -87,7 +95,8 @@ export class QueueStatusComponent implements OnInit, OnDestroy {
     private api: ApiService,
     private auth: AuthService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private dialog: MatDialog
   ) { }
 
   ngOnInit() {
@@ -140,8 +149,15 @@ export class QueueStatusComponent implements OnInit, OnDestroy {
             this.api.getMyQueueStatus(idsToCheck).subscribe(myRows => {
               myRows.forEach(row => {
                 if (row.status === 'seated') {
-                  alert(`You have been seated at Table ${row.table_number || 'Unknown'}. Thank you for waiting!`);
-                  this.removeEntryFromStorage(row.id);
+                  this.dialog.open(SeatedDialogComponent, {
+                    width: '400px',
+                    data: {
+                      tableNumber: row.table_number || 'Unknown',
+                      message: 'Thank you for waiting!'
+                    }
+                  }).afterClosed().subscribe(() => {
+                    this.removeEntryFromStorage(row.id);
+                  });
                 }
               });
             });
@@ -153,18 +169,23 @@ export class QueueStatusComponent implements OnInit, OnDestroy {
         // ... (rest of matching logic)
 
 
-        // Find all matches
+        // Find all matches with Priority Logic
         const matches: any[] = [];
 
-        queue.forEach((q, index) => {
+        queue.forEach((q) => {
           const isUserMatch = userId && q.user_id == userId;
           const isGuestMatch = guestIds.includes(q.id);
 
           if (isUserMatch || isGuestMatch) {
+            // Calculate Priority Position
+            // Filter queue to only show people of the SAME type (VIP vs Regular)
+            const typeQueue = queue.filter(item => item.customer_type === q.customer_type);
+            const position = typeQueue.findIndex(item => item.id === q.id) + 1;
+
             matches.push({
               ...q,
-              position: index + 1,
-              estimatedWaitTime: (index + 1) * 15
+              position: position,
+              estimatedWaitTime: position * 15
             });
           }
         });
@@ -202,11 +223,21 @@ export class QueueStatusComponent implements OnInit, OnDestroy {
   }
 
   leaveQueue(entryId: number) {
-    if (confirm('Are you sure you want to leave this queue?')) {
-      this.api.updateQueueStatus(entryId, 'cancelled').subscribe(() => {
-        this.removeEntryFromStorage(entryId);
-      });
-    }
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '350px',
+      data: {
+        title: 'Leave Queue',
+        message: 'Are you sure you want to leave this queue? You will lose your spot.',
+        confirmText: 'Yes, Leave',
+        cancelText: 'Stay'
+      }
+    }).afterClosed().subscribe(result => {
+      if (result) {
+        this.api.updateQueueStatus(entryId, 'cancelled').subscribe(() => {
+          this.removeEntryFromStorage(entryId);
+        });
+      }
+    });
   }
 
   ngOnDestroy() {

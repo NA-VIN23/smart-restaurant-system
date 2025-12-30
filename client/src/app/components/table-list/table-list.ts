@@ -11,6 +11,7 @@ import { Router } from '@angular/router';
 import { ApiService } from '../../services/api';
 import { AuthService } from '../../services/auth.service';
 import { JoinQueueDialogComponent } from '../join-queue-dialog/join-queue-dialog';
+import { SuccessDialogComponent } from '../success-dialog/success-dialog';
 import { RestaurantTable } from '../../models/types';
 
 @Component({
@@ -126,8 +127,16 @@ export class TableListComponent implements OnInit {
                 ids.push(res.id);
                 sessionStorage.setItem('guestQueueId', JSON.stringify(ids));
               }
-              this.snackBar.open('You have joined the waitlist!', 'Close', { duration: 3000 });
-              this.router.navigate(['/queue']);
+              this.dialog.open(SuccessDialogComponent, {
+                width: '350px',
+                data: {
+                  title: 'Joined!',
+                  message: 'Success! You have been added to the waitlist.',
+                  buttonText: 'View Queue'
+                }
+              }).afterClosed().subscribe(() => {
+                this.router.navigate(['/queue']);
+              });
             },
             error: (err) => {
               console.error(err);
