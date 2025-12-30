@@ -2,6 +2,7 @@
     <div class="header">
         <h2>Queue Management</h2>
         <span class="spacer"></span>
+        <span class="last-updated" *ngIf="lastUpdated">Updated: {{lastUpdated | date:'mediumTime'}}</span>
         <button mat-icon-button (click)="refreshQueue()" title="Refresh Queue">
             <mat-icon>refresh</mat-icon>
         </button>

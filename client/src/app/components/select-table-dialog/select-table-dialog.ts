@@ -53,7 +53,7 @@ export class SelectTableDialogComponent implements OnInit {
 
   constructor(
     public dialogRef: MatDialogRef<SelectTableDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { customerName: string, partySize: number },
+    @Inject(MAT_DIALOG_DATA) public data: { customerName: string, partySize: number, customerType?: string },
     private api: ApiService,
     private cdr: ChangeDetectorRef
   ) { }
@@ -61,7 +61,17 @@ export class SelectTableDialogComponent implements OnInit {
   ngOnInit() {
     this.api.getTables().subscribe(tables => {
       // Show all Available tables (case-insensitive check)
-      this.availableTables = tables.filter(t => t.status && t.status.toLowerCase() === 'available');
+      let filtered = tables.filter(t => t.status && t.status.toLowerCase() === 'available');
+
+      // VIP Logic: If customer is VIP, they can only sit at VIP tables
+      if (this.data.customerType === 'VIP') {
+        filtered = filtered.filter(t => t.type === 'VIP');
+      } else {
+        // Regular Logic: Regular customers cannot sit at VIP tables
+        filtered = filtered.filter(t => t.type !== 'VIP');
+      }
+
+      this.availableTables = filtered;
       this.cdr.detectChanges();
     });
   }

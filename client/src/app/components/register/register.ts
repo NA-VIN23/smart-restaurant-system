@@ -46,13 +46,7 @@ import { AuthService } from '../../services/auth.service';
               <input matInput type="password" [(ngModel)]="password" name="password" required>
             </mat-form-field>
 
-            <mat-form-field appearance="fill" class="full-width">
-              <mat-label>Role</mat-label>
-              <mat-select [(ngModel)]="role" name="role" required>
-                <mat-option value="Customer">Customer</mat-option>
-                <mat-option value="Manager">Restaurant Manager</mat-option>
-              </mat-select>
-            </mat-form-field>
+            <!-- Role selection removed for security -->
 
             <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
 
@@ -77,7 +71,7 @@ export class RegisterComponent {
   name = '';
   email = '';
   password = '';
-  role = 'Customer';
+  // role = 'Customer'; // Removed as user cannot select
   errorMessage = '';
 
   constructor(private authService: AuthService, private router: Router) { }
@@ -87,7 +81,7 @@ export class RegisterComponent {
       name: this.name,
       email: this.email,
       password: this.password,
-      role: this.role
+      role: 'Customer' // Force Customer role
     }).subscribe({
       next: (res: any) => {
         // Auto login or redirect to login

@@ -26,6 +26,7 @@ export class QueueManagement implements OnInit, OnDestroy {
   displayedColumns: string[] = ['name', 'party_size', 'customer_type', 'status', 'actions'];
   queue: any[] = [];
   intervalId: any;
+  lastUpdated: Date = new Date(); // New property
 
   @Output() customerSeated = new EventEmitter<void>();
 
@@ -52,11 +53,12 @@ export class QueueManagement implements OnInit, OnDestroy {
     this.api.getQueue().subscribe({
       next: (data) => {
         this.queue = data;
+        this.lastUpdated = new Date(); // Update timestamp
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error fetching queue:', err);
-        this.snackBar.open('Failed to load queue', 'Close', { duration: 3000 });
+        // Do not snackbar repeatedly on poll fail, just log
       }
     });
   }
@@ -64,7 +66,11 @@ export class QueueManagement implements OnInit, OnDestroy {
   seatCustomer(entry: any) {
     const dialogRef = this.dialog.open(SelectTableDialogComponent, {
       width: '400px',
-      data: { customerName: entry.name, partySize: entry.party_size }
+      data: {
+        customerName: entry.name,
+        partySize: entry.party_size,
+        customerType: entry.customer_type // Pass type
+      }
     });
 
     dialogRef.afterClosed().subscribe(table => {

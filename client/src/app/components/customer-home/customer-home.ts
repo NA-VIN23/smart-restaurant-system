@@ -153,8 +153,18 @@ export class CustomerHomeComponent {
           next: (res: any) => {
             console.log('Join Queue Response:', res);
             if (res.id) {
-              localStorage.setItem('guestQueueId', res.id.toString());
-              console.log('Set guestQueueId:', res.id);
+              const current = sessionStorage.getItem('guestQueueId');
+              let ids: number[] = [];
+              if (current) {
+                if (current.startsWith('[')) {
+                  try { ids = JSON.parse(current); } catch (e) { ids = []; }
+                } else {
+                  ids = [parseInt(current)];
+                }
+              }
+              ids.push(res.id);
+              sessionStorage.setItem('guestQueueId', JSON.stringify(ids));
+              console.log('Set guestQueueId:', ids);
             }
             this.snackBar.open('You have joined the waitlist!', 'Close', { duration: 3000 });
             this.router.navigate(['/queue']); // Redirect to Status Page

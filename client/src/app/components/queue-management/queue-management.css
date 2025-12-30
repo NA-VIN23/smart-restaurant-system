@@ -8,6 +8,12 @@
   margin-bottom: 20px;
 }
 
+.last-updated {
+  margin-right: 15px;
+  color: #666;
+  font-size: 0.9em;
+}
+
 .spacer {
   flex: 1 1 auto;
 }

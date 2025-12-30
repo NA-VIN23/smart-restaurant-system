@@ -1,5 +1,4 @@
-
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -7,6 +6,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -19,7 +19,8 @@ import { AuthService } from '../../services/auth.service';
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
-    MatButtonModule
+    MatButtonModule,
+    MatIconModule
   ],
   template: `
     <div class="auth-container">
@@ -31,15 +32,18 @@ import { AuthService } from '../../services/auth.service';
           <form (ngSubmit)="onLogin()">
             <mat-form-field appearance="fill" class="full-width">
               <mat-label>Email</mat-label>
-              <input matInput [(ngModel)]="email" name="email" required>
+              <input matInput [(ngModel)]="email" name="email" required (input)="errorMessage = ''">
             </mat-form-field>
             
             <mat-form-field appearance="fill" class="full-width">
               <mat-label>Password</mat-label>
-              <input matInput type="password" [(ngModel)]="password" name="password" required>
+              <input matInput type="password" [(ngModel)]="password" name="password" required (input)="errorMessage = ''">
             </mat-form-field>
 
-            <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+            <div class="error-container" *ngIf="errorMessage">
+              <mat-icon>error</mat-icon>
+              <span>{{ errorMessage }}</span>
+            </div>
 
             <button mat-raised-button color="primary" type="submit" [disabled]="!email || !password">Login</button>
           </form>
@@ -53,8 +57,18 @@ import { AuthService } from '../../services/auth.service';
   styles: [`
     .auth-container { display: flex; justify-content: center; align-items: center; height: 80vh; }
     mat-card { width: 400px; padding: 20px; }
-    .full-width { width: 100%; margin-bottom: 15px; }
-    .error { color: red; margin-bottom: 10px; }
+    .full-width { width: 100%; margin-bottom: 5px; } /* Reduced margin */
+    .error-container { 
+      color: #b00020; 
+      background-color: #fdecea; 
+      padding: 10px; 
+      border-radius: 4px; 
+      margin-bottom: 15px; 
+      display: flex; 
+      align-items: center; 
+      gap: 10px;
+    }
+    .error-container mat-icon { font-size: 20px; height: 20px; width: 20px; }
     mat-card-actions { justify-content: center; }
   `]
 })
@@ -63,7 +77,11 @@ export class LoginComponent {
   password = '';
   errorMessage = '';
 
-  constructor(private authService: AuthService, private router: Router) { }
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private cdr: ChangeDetectorRef
+  ) { }
 
   onLogin() {
     this.authService.login(this.email, this.password).subscribe({
@@ -75,7 +93,8 @@ export class LoginComponent {
         }
       },
       error: (err: any) => {
-        this.errorMessage = err.error?.message || 'Login failed';
+        this.errorMessage = err.error?.message || 'Login failed. Please check your credentials.';
+        this.cdr.detectChanges(); // Force UI update
       }
     });
   }

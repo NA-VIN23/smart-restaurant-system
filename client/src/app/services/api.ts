@@ -52,4 +52,36 @@ export class ApiService {
     updateQueueStatus(id: number, status: 'seated' | 'cancelled', tableId?: number): Observable<any> {
         return this.http.put(`${this.apiUrl}/queue/${id}/status`, { status, table_id: tableId });
     }
+
+    // 8. Helper: Get Active Queue Count for User/Guest
+    getActiveQueueCount(userId: number | null, guestIds: number[]): Observable<number> {
+        return new Observable(observer => {
+            if (!userId && guestIds.length === 0) {
+                observer.next(0);
+                observer.complete();
+                return;
+            }
+            // Dedup guest IDs
+            const uniqueGuestIds = [...new Set(guestIds)];
+            this.getQueue().subscribe({
+                next: (queue) => {
+                    let count = 0;
+                    queue.forEach(q => {
+                        const isUserMatch = userId && q.user_id == userId;
+                        const isGuestMatch = guestIds.includes(q.id);
+                        if (isUserMatch || isGuestMatch) count++;
+                    });
+                    observer.next(count);
+                    observer.complete();
+                },
+                error: (err) => observer.error(err)
+            });
+        });
+    }
+
+    // 9. Get My Queue Status (For Notifications)
+    getMyQueueStatus(ids: number[]): Observable<any[]> {
+        if (ids.length === 0) return new Observable(obs => obs.next([]));
+        return this.http.get<any[]>(`${this.apiUrl}/queue/my-status?query_ids=${ids.join(',')}`);
+    }
 }
