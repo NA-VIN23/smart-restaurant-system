@@ -9,6 +9,8 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTabsModule } from '@angular/material/tabs';
 import { ApiService } from '../../services/api';
 import { TableDialogComponent } from '../table-dialog/table-dialog';
+import { SelectTableDialogComponent } from '../select-table-dialog/select-table-dialog';
+import { QueueManagement } from '../queue-management/queue-management';
 import { RestaurantTable } from '../../models/types';
 
 @Component({
@@ -20,7 +22,8 @@ import { RestaurantTable } from '../../models/types';
     MatButtonModule,
     MatIconModule,
     MatDialogModule,
-    MatTabsModule
+    MatTabsModule,
+    QueueManagement
   ],
   template: `
     <div class="dashboard-container">
@@ -79,36 +82,7 @@ import { RestaurantTable } from '../../models/types';
 
         <!-- Queue Tab -->
         <mat-tab label="Queue">
-             <div *ngIf="queue.length === 0" class="no-data">No one in queue.</div>
-             <table *ngIf="queue.length > 0" mat-table [dataSource]="queue" class="mat-elevation-z8">
-                <!-- Name Column -->
-                <ng-container matColumnDef="name">
-                <th mat-header-cell *matHeaderCellDef> Name </th>
-                <td mat-cell *matCellDef="let entry"> {{entry.name}} </td>
-                </ng-container>
-
-                <!-- Party Size Column -->
-                <ng-container matColumnDef="party_size">
-                <th mat-header-cell *matHeaderCellDef> Party Size </th>
-                <td mat-cell *matCellDef="let entry"> {{entry.party_size}} </td>
-                </ng-container>
-
-                <!-- Actions Column -->
-                <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef> Actions </th>
-                <td mat-cell *matCellDef="let entry">
-                    <button mat-stroked-button color="primary" (click)="seatCustomer(entry)">
-                    <mat-icon>check</mat-icon> Seat
-                    </button>
-                    <button mat-icon-button color="warn" (click)="removeQueueEntry(entry)">
-                    <mat-icon>close</mat-icon>
-                    </button>
-                </td>
-                </ng-container>
-
-                <tr mat-header-row *matHeaderRowDef="queueColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: queueColumns;"></tr>
-             </table>
+             <app-queue-management (customerSeated)="loadTables()"></app-queue-management>
         </mat-tab>
       </mat-tab-group>
     </div>
@@ -122,29 +96,17 @@ import { RestaurantTable } from '../../models/types';
 })
 export class ManagerDashboard implements OnInit {
   tables: RestaurantTable[] = [];
-  queue: any[] = [];
   displayedColumns: string[] = ['table_number', 'capacity', 'type', 'status', 'actions'];
-  queueColumns: string[] = ['name', 'party_size', 'actions'];
 
   constructor(private api: ApiService, private dialog: MatDialog, private cdr: ChangeDetectorRef) { }
 
   ngOnInit() {
     this.loadTables();
-    this.loadQueue();
-    // Poll every 5 seconds for updates
-    setInterval(() => this.loadQueue(), 5000);
   }
 
   loadTables() {
     this.api.getTables().subscribe(data => {
       this.tables = data;
-      this.cdr.detectChanges();
-    });
-  }
-
-  loadQueue() {
-    this.api.getQueue().subscribe(data => {
-      this.queue = data;
       this.cdr.detectChanges();
     });
   }
@@ -171,20 +133,6 @@ export class ManagerDashboard implements OnInit {
   deleteTable(table: RestaurantTable) {
     if (confirm(`Are you sure you want to delete Table ${table.table_number}?`)) {
       this.api.deleteTable(table.id).subscribe(() => this.loadTables());
-    }
-  }
-
-  seatCustomer(entry: any) {
-    // In a real app, we would open a dialog to select a table.
-    // For now, simpler: Just mark as 'seated' (removed from queue).
-    if (confirm(`Mark ${entry.name} as Seated?`)) {
-      this.api.updateQueueStatus(entry.id, 'seated').subscribe(() => this.loadQueue());
-    }
-  }
-
-  removeQueueEntry(entry: any) {
-    if (confirm(`Remove ${entry.name} from queue?`)) {
-      this.api.updateQueueStatus(entry.id, 'cancelled').subscribe(() => this.loadQueue());
     }
   }
 }

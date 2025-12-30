@@ -34,8 +34,13 @@ export class ApiService {
 
     // 5. Join Queue (We will add this logic later)
     // 5. Join Queue
-    joinQueue(data: { userId?: number, name?: string, partySize: number }): Observable<any> {
-        return this.http.post(`${this.apiUrl}/queue/join`, data);
+    joinQueue(data: { userId?: number, name?: string, partySize: number, customerType?: string }): Observable<any> {
+        return this.http.post(`${this.apiUrl}/queue/join`, {
+            user_id: data.userId,
+            name: data.name,
+            party_size: data.partySize,
+            customer_type: data.customerType
+        });
     }
 
     // 6. Get Queue
@@ -44,7 +49,39 @@ export class ApiService {
     }
 
     // 7. Update Queue Status
-    updateQueueStatus(id: number, status: 'seated' | 'cancelled'): Observable<any> {
-        return this.http.put(`${this.apiUrl}/queue/${id}/status`, { status });
+    updateQueueStatus(id: number, status: 'seated' | 'cancelled', tableId?: number): Observable<any> {
+        return this.http.put(`${this.apiUrl}/queue/${id}/status`, { status, table_id: tableId });
+    }
+
+    // 8. Helper: Get Active Queue Count for User/Guest
+    getActiveQueueCount(userId: number | null, guestIds: number[]): Observable<number> {
+        return new Observable(observer => {
+            if (!userId && guestIds.length === 0) {
+                observer.next(0);
+                observer.complete();
+                return;
+            }
+            // Dedup guest IDs
+            const uniqueGuestIds = [...new Set(guestIds)];
+            this.getQueue().subscribe({
+                next: (queue) => {
+                    let count = 0;
+                    queue.forEach(q => {
+                        const isUserMatch = userId && q.user_id == userId;
+                        const isGuestMatch = guestIds.includes(q.id);
+                        if (isUserMatch || isGuestMatch) count++;
+                    });
+                    observer.next(count);
+                    observer.complete();
+                },
+                error: (err) => observer.error(err)
+            });
+        });
+    }
+
+    // 9. Get My Queue Status (For Notifications)
+    getMyQueueStatus(ids: number[]): Observable<any[]> {
+        if (ids.length === 0) return new Observable(obs => obs.next([]));
+        return this.http.get<any[]>(`${this.apiUrl}/queue/my-status?query_ids=${ids.join(',')}`);
     }
 }

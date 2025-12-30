@@ -1,11 +1,16 @@
+
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-reservation',
-  imports: [],
-  templateUrl: './reservation.html',
-  styleUrl: './reservation.css',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
+    <div style="padding: 2rem; text-align: center;">
+      <h2>Make a Reservation</h2>
+      <p>This feature is coming soon!</p>
+    </div>
+  `
 })
-export class Reservation {
-
-}
+export class ReservationComponent { }

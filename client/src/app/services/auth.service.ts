@@ -22,24 +22,29 @@ export class AuthService {
         return this.http.post(`${this.apiUrl}/login`, { email, password }).pipe(
             tap((res: any) => {
                 if (res.token) {
-                    localStorage.setItem('token', res.token);
-                    localStorage.setItem('user', JSON.stringify(res.user));
+                    sessionStorage.setItem('token', res.token);
+                    sessionStorage.setItem('user', JSON.stringify(res.user));
                 }
             })
         );
     }
 
     logout() {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('user');
     }
 
     isLoggedIn(): boolean {
-        return !!localStorage.getItem('token');
+        return !!sessionStorage.getItem('token');
     }
 
     getUserRole(): string {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const user = JSON.parse(sessionStorage.getItem('user') || '{}');
         return user.role || '';
+    }
+
+    getUserId(): number | null {
+        const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+        return user.id || null;
     }
 }

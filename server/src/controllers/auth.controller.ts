@@ -9,9 +9,11 @@ const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
 
 // Register User
 export const register = async (req: Request, res: Response): Promise<void> => {
-    const { name, email, password, role, contact_info } = req.body;
+    const { name, email, password, contact_info } = req.body;
+    // Force role to 'Customer'. Ignore req.body.role for security.
+    const role = 'Customer';
 
-    if (!name || !email || !password || !role) {
+    if (!name || !email || !password) {
         res.status(400).json({ message: 'Missing required fields' });
         return;
     }

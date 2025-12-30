@@ -6,7 +6,10 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 import { ApiService } from '../../services/api';
+import { AuthService } from '../../services/auth.service';
 import { JoinQueueDialogComponent } from '../join-queue-dialog/join-queue-dialog';
 import { RestaurantTable } from '../../models/types';
 
@@ -19,7 +22,8 @@ import { RestaurantTable } from '../../models/types';
     MatCardModule,
     MatIconModule,
     MatButtonModule,
-    MatDialogModule
+    MatDialogModule,
+    MatSnackBarModule
   ],
   template: `
     <div class="container">
@@ -58,27 +62,80 @@ import { RestaurantTable } from '../../models/types';
 export class TableListComponent implements OnInit {
   tables: RestaurantTable[] = [];
 
-  constructor(private api: ApiService, private dialog: MatDialog, private cdr: ChangeDetectorRef) { }
+  constructor(
+    private api: ApiService,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar,
+    private cdr: ChangeDetectorRef,
+    private router: Router,
+    private auth: AuthService
+  ) { }
 
   ngOnInit() {
     this.api.getTables().subscribe(data => {
-      this.tables = data;
+      // Sort priority: Available (0), Reserved (1), Occupied (2)  anything else (3)
+      const priority: { [key: string]: number } = {
+        'Available': 0,
+        'Reserved': 1,
+        'Occupied': 2
+      };
+
+      this.tables = data.sort((a, b) => {
+        const pA = priority[a.status] ?? 99;
+        const pB = priority[b.status] ?? 99;
+        return pA - pB;
+      });
+
       this.cdr.detectChanges();
     });
   }
 
   openJoinQueueDialog() {
-    const dialogRef = this.dialog.open(JoinQueueDialogComponent, {
-      width: '300px'
-    });
+    const userId = this.auth.getUserId();
+    const rawGuest = sessionStorage.getItem('guestQueueId');
+    let guestIds = [];
+    try { guestIds = rawGuest ? (rawGuest.startsWith('[') ? JSON.parse(rawGuest) : [parseInt(rawGuest)]) : []; } catch (e) { }
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.api.joinQueue(result).subscribe(
-          () => alert('Joined queue successfully!'),
-          err => alert('Error joining queue')
-        );
+    this.api.getActiveQueueCount(userId, guestIds).subscribe(count => {
+      if (count >= 2) {
+        this.snackBar.open('You have reached the maximum limit of 2 active queues.', 'Close', { duration: 3000 });
+        return;
       }
+
+      const dialogRef = this.dialog.open(JoinQueueDialogComponent, {
+        width: '300px'
+      });
+
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          const queueData = { ...result, userId: userId || null };
+
+          this.api.joinQueue(queueData).subscribe({
+            next: (res: any) => {
+              if (res.id) {
+                // logic to append guest id
+                const current = sessionStorage.getItem('guestQueueId');
+                let ids: number[] = [];
+                if (current) {
+                  if (current.startsWith('[')) {
+                    try { ids = JSON.parse(current); } catch (e) { ids = []; }
+                  } else {
+                    ids = [parseInt(current)];
+                  }
+                }
+                ids.push(res.id);
+                sessionStorage.setItem('guestQueueId', JSON.stringify(ids));
+              }
+              this.snackBar.open('You have joined the waitlist!', 'Close', { duration: 3000 });
+              this.router.navigate(['/queue']);
+            },
+            error: (err) => {
+              console.error(err);
+              this.snackBar.open('Error joining queue', 'Close', { duration: 3000 });
+            }
+          });
+        }
+      });
     });
   }
 }
