@@ -103,7 +103,24 @@ export class ApiService {
         return this.http.put(`${this.apiUrl}/reservation/${id}/status`, { status });
     }
 
+    cancelReservation(id: number): Observable<any> {
+        return this.http.put(`${this.apiUrl}/reservation/${id}/cancel`, {});
+    }
+
+    deleteUserReservation(id: number): Observable<any> {
+        return this.http.delete(`${this.apiUrl}/reservation/${id}`);
+    }
+
+    deleteReservationByManager(id: number): Observable<any> {
+        return this.http.delete(`${this.apiUrl}/reservation/manager/${id}`);
+    }
+
     clearApprovedReservations(): Observable<any> {
         return this.http.delete(`${this.apiUrl}/reservation/approved`);
+    }
+
+    // Chat Agent
+    chatWithAgent(message: string): Observable<any> {
+        return this.http.post(`${this.apiUrl}/chat`, { message });
     }
 }

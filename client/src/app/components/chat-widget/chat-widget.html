@@ -1,0 +1,30 @@
+<!-- Chat FAB -->
+<button mat-fab color="primary" class="chat-fab" (click)="toggleChat()">
+    <mat-icon *ngIf="!isOpen">chat</mat-icon>
+    <mat-icon *ngIf="isOpen">close</mat-icon>
+</button>
+
+<!-- Chat Window -->
+<div class="chat-container" *ngIf="isOpen">
+    <div class="chat-header">
+        <span>The Grand Hotelier</span>
+        <!-- Optional: Min/Close button inside header too -->
+    </div>
+
+    <div class="chat-messages">
+        <div *ngFor="let msg of messages" class="message"
+            [ngClass]="{'user-msg': msg.sender === 'user', 'bot-msg': msg.sender === 'bot'}">
+            {{ msg.text }}
+        </div>
+        <div *ngIf="loading" class="message bot-msg loading-dots">
+            Thinking
+        </div>
+    </div>
+
+    <div class="chat-input">
+        <input [(ngModel)]="userInput" (keyup.enter)="sendMessage()" placeholder="Type a message..." />
+        <button mat-icon-button color="primary" (click)="sendMessage()" [disabled]="loading || !userInput.trim()">
+            <mat-icon>send</mat-icon>
+        </button>
+    </div>
+</div>

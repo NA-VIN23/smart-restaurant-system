@@ -8,7 +8,7 @@ import { LandingComponent } from './components/landing/landing';
 import { ReservationComponent } from './components/reservation/reservation';
 import { RegisterComponent } from './components/register/register';
 import { authGuard } from './guards/auth.guard';
-import { ManagerDashboard } from './components/manager-dashboard/manager-dashboard';
+import { ManagerDashboardComponent } from './components/manager-dashboard/manager-dashboard';
 
 import { CustomerHomeComponent } from './components/customer-home/customer-home';
 
@@ -22,7 +22,7 @@ export const routes: Routes = [
     { path: 'reservation', component: ReservationComponent, canActivate: [authGuard] },
     {
         path: 'manager',
-        component: ManagerDashboard,
+        component: ManagerDashboardComponent,
         canActivate: [authGuard]
     }
 ];

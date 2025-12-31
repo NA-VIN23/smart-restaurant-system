@@ -52,7 +52,7 @@ import { RestaurantTable } from '../../models/types';
     .container { padding: 20px; }
     .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     .grid { display: flex; flex-wrap: wrap; gap: 20px; }
-    mat-card { width: 200px; }
+    mat-card { width: 200px; background-color: var(--bg-card); color: var(--text-main); }
     .status { font-weight: bold; text-align: center; margin-top: 10px; }
     .available { color: green; }
     .occupied { color: red; }

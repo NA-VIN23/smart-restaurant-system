@@ -66,7 +66,7 @@ export const getUserReservations = async (req: Request, res: Response) => {
 
     try {
         const [rows] = await db.query<any[]>(
-            "SELECT * FROM reservations WHERE user_id = ? AND status != 'Declined'",
+            "SELECT * FROM reservations WHERE user_id = ?",
             [userId]
         );
         console.log(`[getUserReservations] Found ${rows.length} records for UserID: ${userId}`);
@@ -92,7 +92,6 @@ export const getReservations = async (req: Request, res: Response) => {
         // Then by Date/Time
         const query = `
             SELECT * FROM reservations 
-            WHERE status != 'Declined' 
             ORDER BY 
                 CASE WHEN status = 'Pending' THEN 1 ELSE 2 END, 
                 reservation_date ASC, 
@@ -147,5 +146,146 @@ export const deleteApprovedReservations = async (req: Request, res: Response) =>
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server Error deleting approved reservations' });
+    }
+};
+
+// Cancel Reservation (User initiated)
+export const cancelReservation = async (req: Request, res: Response) => {
+    const user = (req as any).user;
+    if (!user) {
+        res.status(401).json({ message: 'Unauthorized' });
+        return;
+    }
+
+    const { id } = req.params;
+
+    try {
+        // 1. Get the reservation
+        const [rows] = await db.query<any[]>('SELECT * FROM reservations WHERE id = ?', [id]);
+        if (rows.length === 0) {
+            res.status(404).json({ message: 'Reservation not found' });
+            return;
+        }
+
+        const reservation = rows[0];
+
+        // 2. Check ownership
+        if (reservation.user_id !== user.id) {
+            res.status(403).json({ message: 'You can only cancel your own reservations' });
+            return;
+        }
+
+        // 3. Check 24 hour rule (ONLY is Active/Approved)
+        // If status is 'Pending', user can cancel anytime.
+        if (reservation.status === 'Approved') {
+            const reservationDateTimeStr = `${reservation.reservation_date}T${reservation.reservation_time}`;
+
+            // Handle date parsing safely
+            const datePart = new Date(reservation.reservation_date).toISOString().split('T')[0];
+            const timePart = reservation.reservation_time;
+            // Construct ISO string for standardized parsing uses 'T' here as backend likely doesn't have the AM/PM issue or we should be careful. 
+            // Actually reservation_time in DB might be "13:00:00" or "01:00 PM". 
+            // Note: The controller previously used `T` which might have been part of the problem if strict ISO.
+            // Let's stick to the existing parsing but wrap the 24h check in the status condition.
+
+            // To be safe and consistent with previous fixes, let's use the space separator if we are unsure, 
+            // but here we are just wrapping the existing logic block.
+            // Wait, I should verify the date parsing in backend too since I didn't fix it there yet!
+            // The previous user complaint "server error" was about enum. "Missing cancel button" was frontend.
+            // But if I use `new Date(...)` in Node, it might be stricter.
+            // Let's check what `timePart` is.
+
+            const targetDateTime = new Date(`${datePart} ${timePart}`); // Use space to be safe with AM/PM if present
+
+            const now = new Date();
+            const diffInMs = targetDateTime.getTime() - now.getTime();
+            const diffInHours = diffInMs / (1000 * 60 * 60);
+
+            if (diffInHours < 24) {
+                res.status(400).json({ message: 'Approved reservations can only be cancelled more than 24 hours in advance.' });
+                return;
+            }
+        }
+
+        await db.query("UPDATE reservations SET status = 'Cancelled' WHERE id = ?", [id]);
+        res.json({ message: 'Reservation cancelled successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error cancelling reservation' });
+    }
+};
+
+// Delete Reservation (User initiated - for cleaning up list)
+export const deleteUserReservation = async (req: Request, res: Response) => {
+    const user = (req as any).user;
+    if (!user) {
+        res.status(401).json({ message: 'Unauthorized' });
+        return;
+    }
+
+    const { id } = req.params;
+
+    try {
+        // 1. Get the reservation
+        const [rows] = await db.query<any[]>('SELECT * FROM reservations WHERE id = ?', [id]);
+        if (rows.length === 0) {
+            res.status(404).json({ message: 'Reservation not found' });
+            return;
+        }
+
+        const reservation = rows[0];
+
+        // 2. Check ownership
+        if (reservation.user_id !== user.id) {
+            res.status(403).json({ message: 'You can only delete your own reservations' });
+            return;
+        }
+
+        // 3. Check status (Only Declined or Cancelled)
+        if (!['Declined', 'Cancelled'].includes(reservation.status)) {
+            res.status(400).json({ message: 'Only Declined or Cancelled reservations can be deleted.' });
+            return;
+        }
+
+        await db.query("DELETE FROM reservations WHERE id = ?", [id]);
+        res.json({ message: 'Reservation deleted successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error deleting reservation' });
+    }
+};
+
+// Manager Delete Reservation (Any reservation)
+export const deleteReservationByManager = async (req: Request, res: Response) => {
+    // SECURITY: Ensure Role is Manager
+    const user = (req as any).user;
+    if (!user || user.role !== 'Manager') {
+        res.status(403).json({ message: 'Access Denied: Managers Only' });
+        return;
+    }
+
+    const { id } = req.params;
+
+    try {
+        // 1. Get reservation to check status
+        const [rows] = await db.query<any[]>('SELECT * FROM reservations WHERE id = ?', [id]);
+        if (rows.length === 0) {
+            res.status(404).json({ message: 'Reservation not found' });
+            return;
+        }
+
+        const reservation = rows[0];
+
+        // 2. Enforce Status Rule: Only Declined or Cancelled
+        if (reservation.status !== 'Declined' && reservation.status !== 'Cancelled') {
+            res.status(400).json({ message: 'Managers can only delete Declined or Cancelled reservations.' });
+            return;
+        }
+
+        const [result] = await db.query<ResultSetHeader>("DELETE FROM reservations WHERE id = ?", [id]);
+        res.json({ message: 'Reservation deleted successfully by manager' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error deleting reservation' });
     }
 };

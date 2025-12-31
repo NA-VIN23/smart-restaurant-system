@@ -11,7 +11,7 @@ import { JoinQueueDialogComponent } from '../join-queue-dialog/join-queue-dialog
 import { SuccessDialogComponent } from '../success-dialog/success-dialog';
 import { ApiService } from '../../services/api';
 import { AuthService } from '../../services/auth.service';
-
+import { ParticlesComponent } from '../particles/particles';
 @Component({
   selector: 'app-landing',
   standalone: true,
@@ -21,12 +21,26 @@ import { AuthService } from '../../services/auth.service';
     MatButtonModule,
     MatIconModule,
     MatDialogModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    ParticlesComponent
   ],
   template: `
     <div class="landing-page">
       <!-- Hero Section -->
       <section class="hero">
+        <app-particles 
+            class="hero-particles"
+            [particleColors]="['#4f46e5', '#06b6d4', '#4f46e5']"
+            [particleCount]="300"
+            [particleSpread]="10"
+            [speed]="0.2"
+            [particleBaseSize]="80"
+            [moveParticlesOnHover]="true"
+            [particleHoverFactor]="0.5"
+            [alphaParticles]="true"
+            [disableRotation]="false">
+        </app-particles>
+
         <div class="hero-content">
           <h1>Experience Dining <span class="highlight">Reimagined</span>.</h1>
           <p>Join the queue, book a table, or just browse. Smarter dining starts here.</p>
@@ -74,34 +88,52 @@ import { AuthService } from '../../services/auth.service';
   styles: [`
     .landing-page {
       min-height: 100vh;
-      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      background: linear-gradient(135deg, var(--bg-color) 0%, var(--bg-color) 100%);
     }
 
     /* Hero Section */
     .hero {
       text-align: center;
       padding: 8rem 1rem 4rem;
-      background: radial-gradient(circle at center, rgba(79, 70, 229, 0.05) 0%, rgba(255,255,255,0) 70%);
+      background: radial-gradient(circle at center, rgba(79, 70, 229, 0.1) 0%, rgba(0,0,0,0) 70%);
+      position: relative; /* For absolute positioning of particles */
+      overflow: hidden;
+    }
+
+    /* Particles Background */
+    .hero-particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0; /* Behind content */
+      pointer-events: none; /* Let clicks pass through */
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1; /* Explicitly above particles */
     }
 
     .hero h1 {
       font-size: 3.5rem;
       font-weight: 800;
-      color: var(--text-main, #1e293b);
+      color: var(--text-main);
       margin-bottom: 1rem;
       line-height: 1.2;
     }
 
     .hero .highlight {
-      color: var(--primary-color, #4f46e5);
-      background: -webkit-linear-gradient(45deg, #4f46e5, #06b6d4);
+      color: var(--primary-color);
+      background: -webkit-linear-gradient(45deg, var(--primary-color), var(--accent-color));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
     .hero p {
       font-size: 1.25rem;
-      color: var(--text-muted, #64748b);
+      color: var(--text-muted);
       max-width: 600px;
       margin: 0 auto;
     }
@@ -120,14 +152,14 @@ import { AuthService } from '../../services/auth.service';
     }
 
     .action-card {
-      background: white;
+      background: var(--bg-card);
       border-radius: 16px;
       padding: 2rem;
       text-align: center;
       transition: all 0.3s ease;
       cursor: pointer;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-      border: 1px solid rgba(0,0,0,0.02);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -135,7 +167,7 @@ import { AuthService } from '../../services/auth.service';
 
     .action-card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      box-shadow: var(--shadow-md);
     }
 
     .icon-wrapper {

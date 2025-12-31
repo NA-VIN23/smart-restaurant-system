@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createReservation, getReservations, updateReservationStatus } from '../controllers/reservation.controller';
+import { createReservation, getReservations, updateReservationStatus, cancelReservation, deleteUserReservation } from '../controllers/reservation.controller';
 import { authenticateToken } from '../middleware/auth.middleware';
 
 const router = Router();
@@ -13,13 +13,17 @@ const router = Router();
 router.post('/', authenticateToken, createReservation);
 
 // User Reservations
-import { getUserReservations, deleteApprovedReservations } from '../controllers/reservation.controller';
-router.get('/my-reservations', authenticateToken, getUserReservations);
-
-// Manager only? or authenticated?
-// For now, simple auth.
+import { getUserReservations, deleteApprovedReservations, deleteReservationByManager } from '../controllers/reservation.controller';
+// Manager Routes (Must be defined BEFORE generic /:id routes)
 router.get('/', authenticateToken, getReservations);
 router.put('/:id/status', authenticateToken, updateReservationStatus);
 router.delete('/approved', authenticateToken, deleteApprovedReservations);
+router.delete('/manager/:id', authenticateToken, deleteReservationByManager);
+
+// User Routes
+router.get('/my-reservations', authenticateToken, getUserReservations);
+router.put('/:id/cancel', authenticateToken, cancelReservation);
+// Generic Delete (User) - Must be last because it matches /:id
+router.delete('/:id', authenticateToken, deleteUserReservation);
 
 export default router;

@@ -7,10 +7,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatMenuModule } from '@angular/material/menu';
 import { ApiService } from '../../services/api';
 import { TableDialogComponent } from '../table-dialog/table-dialog';
 import { SelectTableDialogComponent } from '../select-table-dialog/select-table-dialog';
-import { QueueManagement } from '../queue-management/queue-management';
+import { QueueManagementComponent } from '../queue-management/queue-management';
 import { RestaurantTable } from '../../models/types';
 
 @Component({
@@ -23,7 +24,8 @@ import { RestaurantTable } from '../../models/types';
     MatIconModule,
     MatDialogModule,
     MatTabsModule,
-    QueueManagement
+    MatMenuModule,
+    QueueManagementComponent
   ],
   template: `
     <div class="dashboard-container">
@@ -66,12 +68,19 @@ import { RestaurantTable } from '../../models/types';
             <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef> Actions </th>
             <td mat-cell *matCellDef="let table">
-                <button mat-icon-button color="primary" (click)="openTableDialog(table)">
-                <mat-icon>edit</mat-icon>
+                <button mat-icon-button [matMenuTriggerFor]="menu">
+                    <mat-icon>more_vert</mat-icon>
                 </button>
-                <button mat-icon-button color="warn" (click)="deleteTable(table)">
-                <mat-icon>delete</mat-icon>
-                </button>
+                <mat-menu #menu="matMenu">
+                    <button mat-menu-item (click)="openTableDialog(table)">
+                        <mat-icon>edit</mat-icon>
+                        <span>Edit</span>
+                    </button>
+                    <button mat-menu-item (click)="deleteTable(table)">
+                        <mat-icon color="warn">delete</mat-icon>
+                        <span>Delete</span>
+                    </button>
+                </mat-menu>
             </td>
             </ng-container>
 
@@ -143,11 +152,14 @@ import { RestaurantTable } from '../../models/types';
                 <button mat-icon-button color="warn" *ngIf="res.status === 'Pending'" (click)="updateStatus(res, 'Declined')" title="Decline">
                   <mat-icon>cancel</mat-icon>
                 </button>
+                <button mat-icon-button color="warn" *ngIf="res.status === 'Declined' || res.status === 'Cancelled'" (click)="deleteReservation(res)" title="Delete Reservation" style="margin-left: 5px;">
+                  <mat-icon>delete</mat-icon>
+                </button>
               </td>
             </ng-container>
 
             <tr mat-header-row *matHeaderRowDef="reservationColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: reservationColumns;"></tr>
+            <tr mat-row *matRowDef="let row; columns: reservationColumns;" [ngClass]="{'inactive-row': row.status === 'Declined' || row.status === 'Cancelled'}"></tr>
           </table>
 
           <div *ngIf="reservations.length === 0" class="no-data">
@@ -160,13 +172,16 @@ import { RestaurantTable } from '../../models/types';
   `,
   styles: [`
     .dashboard-container { padding: 20px; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .tab-actions { margin-top: 20px; display: flex; justify-content: flex-end; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 20px; }
+    .tab-actions { margin-top: 20px; display: flex; justify-content: flex-end; gap: 15px; }
     table { width: 100%; margin-top: 10px; }
-    .no-data { padding: 20px; text-align: center; color: #666; font-style: italic; }
+    .no-data { padding: 20px; text-align: center; color: var(--text-muted); font-style: italic; }
+    
+    .inactive-row { background-color: var(--bg-color); color: var(--text-muted); }
+    .inactive-row td { color: var(--text-muted) !important; }
   `]
 })
-export class ManagerDashboard implements OnInit {
+export class ManagerDashboardComponent implements OnInit {
   tables: RestaurantTable[] = [];
   displayedColumns: string[] = ['table_number', 'capacity', 'type', 'status', 'actions'];
 
@@ -240,6 +255,17 @@ export class ManagerDashboard implements OnInit {
         next: () => {
           this.loadReservations();
           // alert('Cleared approved reservations.');
+        },
+        error: (err) => console.error(err)
+      });
+    }
+  }
+
+  deleteReservation(res: any) {
+    if (confirm(`Are you sure you want to permanently delete the reservation for ${res.name}?`)) {
+      this.api.deleteReservationByManager(res.id).subscribe({
+        next: () => {
+          this.loadReservations();
         },
         error: (err) => console.error(err)
       });
