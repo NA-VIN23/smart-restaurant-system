@@ -4,6 +4,7 @@ import { RouterModule, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../services/auth.service';
+import { ThemeService } from '../../services/theme.service';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
@@ -20,8 +21,17 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
         <div class="spacer"></div>
         
         <div class="nav-links">
+          <!-- Theme Toggle -->
+          <button mat-icon-button (click)="themeService.toggleTheme()" class="theme-toggle">
+            <mat-icon>{{ themeService.isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+          </button>
+
           <button *ngIf="authService.getUserRole() !== 'Manager'" mat-button (click)="checkQueue()" class="nav-link">
              <mat-icon>queue</mat-icon> Your Queue
+          </button>
+          
+          <button *ngIf="authService.getUserRole() !== 'Manager'" mat-button routerLink="/reservation" class="nav-link">
+             <mat-icon>event</mat-icon> My Reservation
           </button>
           
           <ng-container *ngIf="!authService.isLoggedIn()">
@@ -30,7 +40,6 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
           </ng-container>
 
           <ng-container *ngIf="authService.isLoggedIn()">
-            <span class="welcome-text" *ngIf="false">Welcome</span>
             <button mat-button color="warn" (click)="logout()">
               <mat-icon>logout</mat-icon> Logout
             </button>
@@ -44,13 +53,14 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
       position: sticky;
       top: 0;
       z-index: 1000;
-      background: rgba(255, 255, 255, 0.8);
+      background: var(--glass-bg, rgba(255, 255, 255, 0.8));
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(0,0,0,0.05);
+      border-bottom: 1px solid var(--border-color);
       height: 70px;
       display: flex;
       align-items: center;
+      transition: background-color 0.3s ease;
     }
     
     .container {
@@ -81,7 +91,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
     .nav-link {
       font-weight: 500;
-      color: var(--text-main, #1e293b);
+      color: var(--text-main);
     }
 
     .cta-btn {
@@ -92,6 +102,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 export class NavbarComponent {
   constructor(
     public authService: AuthService,
+    public themeService: ThemeService,
     private router: Router,
     private snackBar: MatSnackBar
   ) { }

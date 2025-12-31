@@ -22,7 +22,7 @@ import { SelectTableDialogComponent } from '../select-table-dialog/select-table-
   templateUrl: './queue-management.html',
   styleUrl: './queue-management.css',
 })
-export class QueueManagement implements OnInit, OnDestroy {
+export class QueueManagementComponent implements OnInit, OnDestroy {
   displayedColumns: string[] = ['name', 'party_size', 'customer_type', 'status', 'actions'];
   queue: any[] = [];
   intervalId: any;
