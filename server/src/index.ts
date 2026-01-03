@@ -31,7 +31,7 @@ const optionalAuth = (req: any, res: any, next: any) => {
         return next();
     }
     const jwt = require('jsonwebtoken');
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET || 'secret', (err: any, user: any) => {
+    jwt.verify(token, process.env.JWT_SECRET || 'supersecretkey', (err: any, user: any) => {
         // If token invalid, treat as Guest? Or error?
         // Let's treat as Guest to avoid blocking chat if token expired.
         if (err) req.user = null;

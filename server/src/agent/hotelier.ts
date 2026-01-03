@@ -16,13 +16,13 @@ export class GrandHotelierAgent {
         });
     }
 
-    private async getAppData() {
+    private async getAppData(role: string, userId?: number) {
         try {
             // Queue Count
             const [queueRows]: any[] = await db.query("SELECT COUNT(*) as count FROM queue_entries WHERE status = 'waiting'");
             const queueLength = queueRows[0].count;
 
-            // Pending Reservations
+            // Pending Reservations (Count)
             const [resRows]: any[] = await db.query("SELECT COUNT(*) as count FROM reservations WHERE status = 'Pending'");
             const pendingReservations = resRows[0].count;
 
@@ -30,14 +30,35 @@ export class GrandHotelierAgent {
             const [tableRows]: any[] = await db.query("SELECT COUNT(*) as count FROM restaurant_tables WHERE status = 'Available'");
             const availableTables = tableRows[0].count;
 
+            // Context Specific Data
+            let reservationDetails = "";
+            if (role.toLowerCase() === 'manager') {
+                // Get list of pending reservations
+                const [pendingRows]: any[] = await db.query("SELECT name, party_size, reservation_time FROM reservations WHERE status = 'Pending' ORDER BY reservation_date, reservation_time LIMIT 5");
+                if (pendingRows.length > 0) {
+                    reservationDetails = "Pending Requests: " + pendingRows.map((r: any) => `${r.name} (${r.party_size} pax) at ${r.reservation_time}`).join(", ");
+                } else {
+                    reservationDetails = "No pending reservation requests.";
+                }
+            } else if (userId) {
+                // Get customer's reservations
+                const [myRows]: any[] = await db.query("SELECT status, reservation_date, reservation_time FROM reservations WHERE user_id = ? AND status != 'Cancelled'", [userId]);
+                if (myRows.length > 0) {
+                    reservationDetails = "User's Reservations: " + myRows.map((r: any) => `${r.status} for ${r.reservation_date} at ${r.reservation_time}`).join("; ");
+                } else {
+                    reservationDetails = "User has no active reservations.";
+                }
+            }
+
             return {
                 queueLength,
                 pendingReservations,
-                availableTables
+                availableTables,
+                reservationDetails
             };
         } catch (error) {
             console.error("Error fetching app data for agent:", error);
-            return { queueLength: 'Unknown', pendingReservations: 'Unknown', availableTables: 'Unknown' };
+            return { queueLength: 'Unknown', pendingReservations: 'Unknown', availableTables: 'Unknown', reservationDetails: '' };
         }
     }
 
@@ -46,10 +67,11 @@ export class GrandHotelierAgent {
         const qLength = (typeof appData.queueLength === 'number') ? appData.queueLength : 0;
         const pReservations = (typeof appData.pendingReservations === 'number') ? appData.pendingReservations : 0;
         const aTables = (typeof appData.availableTables === 'number') ? appData.availableTables : 0;
+        const resDetails = appData.reservationDetails || "No specific reservation data.";
 
-        const dataSummary = `Current App State: Queue Length: ${qLength}, Pending Reservations: ${pReservations}, Available Tables: ${aTables}.`;
+        const dataSummary = `Current App State: Queue Length: ${qLength}, Pending Reservations: ${pReservations}, Available Tables: ${aTables}. Reservation Context: ${resDetails}`;
 
-        if (role === 'Manager') {
+        if (role && role.toLowerCase() === 'manager') {
             return `You are "The Grand Hotelier," a highly intelligent, role-aware AI concierge.
 Role: Manager (The Efficient Underling).
 Tone: Respectful but honest. Professional humor.
@@ -58,6 +80,7 @@ Context: ${dataSummary}
 Behavior:
 - Summarize pending tasks (e.g., "Greetings, Chief. You have ${pReservations} reservations waiting...").
 - Make light of the chaos but prioritize work.
+- if they ask anything like what role is me? just say your the manager. and dont only use this line and this role is manager not a valued customer and he is manager and not customer.
 - Be concise.
 Rules:
 - Never share Manager data with Customers (but you are talking to a Manager now, so it's okay).
@@ -69,13 +92,15 @@ Rules:
 
             return `You are "The Grand Hotelier," a highly intelligent, role-aware AI concierge.
 Role: Customer (The Charming Host).
-Tone: Charming, welcoming, slightly playful. Dry, witty humor.
+Tone: Charming, welcoming, slightly playful. Dry, witty humor and Playful guy using jokes when needed.
 Objective: Assist with joining queue and reservations.
 Context: ${dataSummary}, Estimated Wait Time: ${estWait} minutes.
 Behavior:
 - Provide "Live Estimates" for the queue. If it's roughly ${estWait} mins, say something regarding that time frame.
 - Be incredibly polite if no tables are ready (Available: ${aTables}).
-- Be concise.
+- Be concise and only Short replies.
+- If they ask for a joke, tell them and make them laugh in good jokes.
+- If they ask for any food suggestions, give them some good suggestions and just create yourself this is the bestseller in our restraurant and funnier line like "I think the chief having a good day and lot of fun with this dish LOL" But create yourself. dont only use this line.
 Rules:
 - Never share Manager data (like exactly how many reservations are pending) with a Customer.
 - If asking for outside scope (flights), politely decline.
@@ -83,8 +108,8 @@ Rules:
         }
     }
 
-    public async chat(userRole: string, userMessage: string): Promise<string> {
-        const appData = await this.getAppData();
+    public async chat(userRole: string, userMessage: string, userId?: number): Promise<string> {
+        const appData = await this.getAppData(userRole, userId);
         const systemPrompt = this.getSystemPrompt(userRole, appData);
 
         // Construct messages for Groq (OpenAI compatible format)
