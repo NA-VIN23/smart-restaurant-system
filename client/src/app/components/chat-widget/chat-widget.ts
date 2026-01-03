@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api';
@@ -113,7 +113,7 @@ export class ChatWidgetComponent {
   userInput = '';
   loading = false;
 
-  constructor(private api: ApiService) { }
+  constructor(private api: ApiService, private cdr: ChangeDetectorRef) { }
 
   toggleChat() {
     this.isOpen = !this.isOpen;
@@ -130,13 +130,15 @@ export class ChatWidgetComponent {
     this.api.chatWithAgent(text).subscribe({
       next: (res: any) => {
         this.messages.push({ sender: 'bot', text: res.reply });
-        this.scrollToBottom();
         this.loading = false;
+        this.cdr.detectChanges(); // Force update
+        this.scrollToBottom();
       },
       error: (err) => {
         console.error(err);
         this.messages.push({ sender: 'bot', text: 'My apologies, I seem to have lost my train of thought. Please try again.' });
         this.loading = false;
+        this.cdr.detectChanges(); // Force update
       }
     });
 

@@ -24,7 +24,7 @@ export const chatWithAgent = async (req: Request, res: Response) => {
     }
 
     try {
-        const reply = await agent.chat(role, userMessage);
+        const reply = await agent.chat(role, userMessage, user?.id);
         res.json({ reply });
     } catch (error) {
         console.error("Chat Controller Error:", error);
