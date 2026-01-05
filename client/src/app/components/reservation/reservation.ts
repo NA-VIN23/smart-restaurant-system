@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { ApiService } from '../../services/api';
+import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 import { SuccessDialogComponent } from '../success-dialog/success-dialog';
 import { ReservationDialogComponent } from './reservation-dialog';
@@ -153,7 +153,7 @@ import { ReservationDialogComponent } from './reservation-dialog';
     
     .limit-warning { 
         background-color: rgba(239, 68, 68, 0.1); 
-        color: #d32f2f; 
+        color: #ef5350; /* Softer red for better dark mode visibility */ 
         padding: 15px; 
         border-radius: 8px; 
         margin-bottom: 20px;

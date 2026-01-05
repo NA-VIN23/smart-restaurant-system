@@ -5,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { ApiService } from '../../services/api';
+import { ApiService } from '../../services/api.service';
 import { SelectTableDialogComponent } from '../select-table-dialog/select-table-dialog';
 
 @Component({

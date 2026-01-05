@@ -8,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatMenuModule } from '@angular/material/menu';
-import { ApiService } from '../../services/api';
+import { ApiService } from '../../services/api.service';
 import { TableDialogComponent } from '../table-dialog/table-dialog';
 import { SelectTableDialogComponent } from '../select-table-dialog/select-table-dialog';
 import { QueueManagementComponent } from '../queue-management/queue-management';
