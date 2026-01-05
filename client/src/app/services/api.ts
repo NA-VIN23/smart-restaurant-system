@@ -8,7 +8,7 @@ import { RestaurantTable } from '../models/types'; // Importing your Contract
     providedIn: 'root'
 })
 export class ApiService {
-    private apiUrl = 'https://smart-restaurant-backend-qdu5.onrender.com/api';
+    private apiUrl = 'http://localhost:3000/api';
     // Your Node Backend
 
     constructor(private http: HttpClient) { }
