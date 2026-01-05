@@ -8,20 +8,16 @@ export const db = mysql.createPool({
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    port: Number(process.env.DB_PORT),     // ✅ REQUIRED
+    port: Number(process.env.DB_PORT),
     waitForConnections: true,
-    connectionLimit: 10,
-    ssl: {
-        rejectUnauthorized: false          // ✅ REQUIRED FOR RAILWAY
-    }
+    connectionLimit: 10
 });
 
-// Test the connection immediately
 db.getConnection()
     .then(conn => {
-        console.log('✅ MySQL Database Connected Successfully!');
+        console.log('✅ LOCAL MySQL connected');
         conn.release();
     })
     .catch(err => {
-        console.error('❌ Database Connection Failed:', err);
+        console.error('❌ LOCAL DB failed:', err.message);
     });
