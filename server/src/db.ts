@@ -1,15 +1,19 @@
-import mysql from 'mysql2/promise'; // Using Promise version for modern async/await
+import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 
-dotenv.config(); // Load password from .env file
+dotenv.config();
 
 export const db = mysql.createPool({
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || 'your_password', // Replace if not using .env
-    database: process.env.DB_NAME || 'restaurant_db',
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: Number(process.env.DB_PORT),     // ✅ REQUIRED
     waitForConnections: true,
-    connectionLimit: 10
+    connectionLimit: 10,
+    ssl: {
+        rejectUnauthorized: false          // ✅ REQUIRED FOR RAILWAY
+    }
 });
 
 // Test the connection immediately
@@ -19,5 +23,5 @@ db.getConnection()
         conn.release();
     })
     .catch(err => {
-        console.error('❌ Database Connection Failed:', err.message);
+        console.error('❌ Database Connection Failed:', err);
     });

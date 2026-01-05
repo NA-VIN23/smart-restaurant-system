@@ -4,7 +4,7 @@ USE restaurant_db;
 
 -- 1. Users Table (Handles Customer, Manager, Admin)
 
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     role ENUM('Customer', 'Manager', 'Admin') NOT NULL, 
@@ -15,8 +15,7 @@ CREATE TABLE users (
 );
 
 -- 2. Tables & Reservations Table (The "Simple Relation")
-[cite_start]-- Source: PDF Section 6 [cite: 185-193]
-CREATE TABLE restaurant_tables (
+CREATE TABLE IF NOT EXISTS restaurant_tables (
     id INT AUTO_INCREMENT PRIMARY KEY,
     table_number VARCHAR(50) NOT NULL UNIQUE,
     capacity INT NOT NULL,
