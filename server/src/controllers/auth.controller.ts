@@ -9,9 +9,11 @@ const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
 
 // Register User
 export const register = async (req: Request, res: Response): Promise<void> => {
-    const { name, email, password, contact_info } = req.body;
-    // Force role to 'Customer'. Ignore req.body.role for security.
-    const role = 'Customer';
+    const { name, email, password, role, contact_info } = req.body;
+
+    // Validate role (defaults to Customer if not provided or invalid)
+    const validRoles = ['Customer', 'Manager'];
+    const userRole = validRoles.includes(role) ? role : 'Customer';
 
     if (!name || !email || !password) {
         res.status(400).json({ message: 'Missing required fields' });
@@ -32,7 +34,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         // Insert new user
         const [result] = await db.query<ResultSetHeader>(
             'INSERT INTO users (name, email, password, role, contact_info) VALUES (?, ?, ?, ?, ?)',
-            [name, email, hashedPassword, role, contact_info || '']
+            [name, email, hashedPassword, userRole, contact_info || '']
         );
 
         res.status(201).json({ message: 'User registered successfully', userId: result.insertId });
