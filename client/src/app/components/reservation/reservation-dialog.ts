@@ -9,7 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { ApiService } from '../../services/api';
+import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 
 import { provideNativeDateAdapter } from '@angular/material/core';

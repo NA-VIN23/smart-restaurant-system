@@ -5,7 +5,7 @@ import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/materia
 import { MatListModule } from '@angular/material/list';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { ApiService } from '../../services/api';
+import { ApiService } from '../../services/api.service';
 import { RestaurantTable } from '../../models/types';
 
 @Component({

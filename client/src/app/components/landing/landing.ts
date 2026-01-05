@@ -9,7 +9,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { JoinQueueDialogComponent } from '../join-queue-dialog/join-queue-dialog';
 import { SuccessDialogComponent } from '../success-dialog/success-dialog';
-import { ApiService } from '../../services/api';
+import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 import { ParticlesComponent } from '../particles/particles';
 @Component({

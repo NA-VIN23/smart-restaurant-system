@@ -15,9 +15,9 @@ export const db = mysql.createPool({
 
 db.getConnection()
     .then(conn => {
-        console.log('✅ LOCAL MySQL connected');
+        console.log('✅ Database connection successful');
         conn.release();
     })
     .catch(err => {
-        console.error('❌ LOCAL DB failed:', err.message);
+        console.error('❌ Database connection failed:', err.message);
     });

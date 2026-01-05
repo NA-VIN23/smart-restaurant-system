@@ -8,7 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { ApiService } from '../../services/api';
+import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 import { JoinQueueDialogComponent } from '../join-queue-dialog/join-queue-dialog';
 import { SuccessDialogComponent } from '../success-dialog/success-dialog';

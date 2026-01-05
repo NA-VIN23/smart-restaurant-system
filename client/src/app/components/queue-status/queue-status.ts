@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatDialog } from '@angular/material/dialog';
-import { ApiService } from '../../services/api';
+import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { SeatedDialogComponent } from '../seated-dialog/seated-dialog';
@@ -26,7 +26,7 @@ import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog';
     <div class="container">
       <div class="status-list">
         
-        <h2 style="text-align: center; color: #333; margin-bottom: 20px;">Your Waitlist Status</h2>
+        <h2 style="text-align: center; color: var(--text-main); margin-bottom: 20px;">Your Waitlist Status</h2>
 
         <div *ngIf="loading" class="loading">
              <mat-progress-bar mode="indeterminate"></mat-progress-bar>
@@ -77,12 +77,12 @@ import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog';
     .container { display: flex; justify-content: center; padding: 40px; }
     .status-list { width: 100%; max-width: 500px; }
     .status-card { margin-bottom: 20px; text-align: center; }
-    .card { background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    .not-in-queue mat-icon { font-size: 48px; height: 48px; width: 48px; color: grey; margin-bottom: 10px; }
+    .card { background: var(--bg-card); color: var(--text-main); padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .not-in-queue mat-icon { font-size: 48px; height: 48px; width: 48px; color: var(--text-muted); margin-bottom: 10px; }
     .info-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 20px 0; font-size: 1.1em; }
-    .position-badge { background: #e3f2fd; padding: 20px; border-radius: 8px; margin-top: 20px; }
-    .position-badge .label { display: block; font-size: 0.9em; color: #1565c0; }
-    .position-badge .value { display: block; font-size: 3em; font-weight: bold; color: #1565c0; }
+    .position-badge { background: rgba(33, 150, 243, 0.1); padding: 20px; border-radius: 8px; margin-top: 20px; border: 1px solid rgba(33, 150, 243, 0.3); }
+    .position-badge .label { display: block; font-size: 0.9em; color: var(--primary-color); }
+    .position-badge .value { display: block; font-size: 3em; font-weight: bold; color: var(--primary-color); }
   `]
 })
 export class QueueStatusComponent implements OnInit, OnDestroy {
