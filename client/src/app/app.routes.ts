@@ -11,18 +11,46 @@ import { authGuard } from './guards/auth.guard';
 import { ManagerDashboardComponent } from './components/manager-dashboard/manager-dashboard';
 
 import { CustomerHomeComponent } from './components/customer-home/customer-home';
+import { roleGuard } from './guards/role.guard';
 
 export const routes: Routes = [
-    { path: '', component: LandingComponent, pathMatch: 'full' },
+    {
+        path: '',
+        component: LandingComponent,
+        pathMatch: 'full',
+        canActivate: [roleGuard],
+        data: { roles: ['Customer', ''] }
+    },
     { path: 'login', component: LoginComponent },
     { path: 'register', component: RegisterComponent },
-    { path: 'home', component: LandingComponent },
-    { path: 'tables', component: TableListComponent, canActivate: [authGuard] },
-    { path: 'queue', component: QueueStatusComponent, canActivate: [authGuard] },
-    { path: 'reservation', component: ReservationComponent, canActivate: [authGuard] },
+    {
+        path: 'home',
+        component: LandingComponent,
+        canActivate: [roleGuard],
+        data: { roles: ['Customer', ''] }
+    },
+    {
+        path: 'tables',
+        component: TableListComponent,
+        canActivate: [authGuard, roleGuard],
+        data: { roles: ['Customer'] }
+    },
+    {
+        path: 'queue',
+        component: QueueStatusComponent,
+        canActivate: [authGuard, roleGuard],
+        data: { roles: ['Customer'] }
+    },
+    {
+        path: 'reservation',
+        component: ReservationComponent,
+        canActivate: [authGuard, roleGuard],
+        data: { roles: ['Customer'] }
+    },
     {
         path: 'manager',
         component: ManagerDashboardComponent,
-        canActivate: [authGuard]
+        canActivate: [authGuard, roleGuard],
+        data: { roles: ['Manager'] }
     }
 ];
