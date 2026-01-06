@@ -14,7 +14,9 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
   template: `
     <nav class="navbar">
       <div class="container">
-        <a routerLink="/" class="logo">
+        <a [routerLink]="authService.getUserRole() === 'Manager' ? null : '/'"
+           [style.cursor]="authService.getUserRole() === 'Manager' ? 'default' : 'pointer'"
+           class="logo">
           Smarz
         </a>
         

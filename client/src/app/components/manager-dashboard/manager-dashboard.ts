@@ -13,6 +13,7 @@ import { TableDialogComponent } from '../table-dialog/table-dialog';
 import { SelectTableDialogComponent } from '../select-table-dialog/select-table-dialog';
 import { QueueManagementComponent } from '../queue-management/queue-management';
 import { RestaurantTable } from '../../models/types';
+import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog';
 
 @Component({
   selector: 'app-manager-dashboard',
@@ -61,7 +62,15 @@ import { RestaurantTable } from '../../models/types';
             <!-- Status Column -->
             <ng-container matColumnDef="status">
             <th mat-header-cell *matHeaderCellDef> Status </th>
-            <td mat-cell *matCellDef="let table"> {{table.status}} </td>
+            <td mat-cell *matCellDef="let table">
+                <span [ngClass]="{
+                    'status-available': table.status === 'Available',
+                    'status-occupied': table.status === 'Occupied',
+                    'status-reserved': table.status === 'Reserved'
+                }">
+                    {{table.status}}
+                </span>
+            </td>
             </ng-container>
 
             <!-- Actions Column -->
@@ -179,6 +188,10 @@ import { RestaurantTable } from '../../models/types';
     
     .inactive-row { background-color: var(--bg-color); color: var(--text-muted); }
     .inactive-row td { color: var(--text-muted) !important; }
+
+    .status-available { color: green; font-weight: bold; }
+    .status-occupied { color: red; font-weight: bold; }
+    .status-reserved { color: #fbc02d; font-weight: bold; }
   `]
 })
 export class ManagerDashboardComponent implements OnInit {
@@ -219,9 +232,21 @@ export class ManagerDashboardComponent implements OnInit {
   }
 
   deleteTable(table: RestaurantTable) {
-    if (confirm(`Are you sure you want to delete Table ${table.table_number}?`)) {
-      this.api.deleteTable(table.id).subscribe(() => this.loadTables());
-    }
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Delete Table',
+        message: `Are you sure you want to delete Table ${table.table_number}? This action cannot be undone.`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.api.deleteTable(table.id).subscribe(() => this.loadTables());
+      }
+    });
   }
 
   // --- RESERVATIONS ---
@@ -250,25 +275,48 @@ export class ManagerDashboardComponent implements OnInit {
   }
 
   clearApproved() {
-    if (confirm('Are you sure? This will delete all APPROVED reservations to reset testing data.')) {
-      this.api.clearApprovedReservations().subscribe({
-        next: () => {
-          this.loadReservations();
-          // alert('Cleared approved reservations.');
-        },
-        error: (err) => console.error(err)
-      });
-    }
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Clear Approved Reservations',
+        message: 'Are you sure? This will delete all APPROVED reservations to reset testing data.',
+        confirmText: 'Clear All',
+        cancelText: 'Cancel'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.api.clearApprovedReservations().subscribe({
+          next: () => {
+            this.loadReservations();
+          },
+          error: (err) => console.error(err)
+        });
+      }
+    });
   }
 
   deleteReservation(res: any) {
-    if (confirm(`Are you sure you want to permanently delete the reservation for ${res.name}?`)) {
-      this.api.deleteReservationByManager(res.id).subscribe({
-        next: () => {
-          this.loadReservations();
-        },
-        error: (err) => console.error(err)
-      });
-    }
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Delete Reservation',
+        message: `Are you sure you want to permanently delete the reservation for ${res.name}?`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.api.deleteReservationByManager(res.id).subscribe({
+          next: () => {
+            this.loadReservations();
+          },
+          error: (err) => console.error(err)
+        });
+      }
+    });
   }
 }

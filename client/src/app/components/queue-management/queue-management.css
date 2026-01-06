@@ -23,6 +23,13 @@ table {
 }
 
 .mat-column-actions {
-  width: 100px;
-  text-align: right;
+  width: 150px;
+  text-align: center;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
 }

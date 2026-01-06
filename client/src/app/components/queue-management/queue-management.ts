@@ -7,6 +7,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ApiService } from '../../services/api.service';
 import { SelectTableDialogComponent } from '../select-table-dialog/select-table-dialog';
+import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog';
 
 @Component({
   selector: 'app-queue-management',
@@ -91,17 +92,29 @@ export class QueueManagementComponent implements OnInit, OnDestroy {
   }
 
   removeQueueEntry(entry: any) {
-    if (confirm(`Remove ${entry.name} from queue?`)) {
-      this.api.updateQueueStatus(entry.id, 'cancelled').subscribe({
-        next: () => {
-          this.snackBar.open(`Removed ${entry.name} from queue`, 'Ok', { duration: 3000 });
-          this.refreshQueue();
-        },
-        error: (err) => {
-          console.error('Error removing from queue:', err);
-          this.snackBar.open('Failed to remove customer', 'Close', { duration: 3000 });
-        }
-      });
-    }
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Remove from Queue',
+        message: `Are you sure you want to remove ${entry.name} from the queue?`,
+        confirmText: 'Remove',
+        cancelText: 'Cancel'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.api.updateQueueStatus(entry.id, 'cancelled').subscribe({
+          next: () => {
+            this.snackBar.open(`Removed ${entry.name} from queue`, 'Ok', { duration: 3000 });
+            this.refreshQueue();
+          },
+          error: (err) => {
+            console.error('Error removing from queue:', err);
+            this.snackBar.open('Failed to remove customer', 'Close', { duration: 3000 });
+          }
+        });
+      }
+    });
   }
 }
