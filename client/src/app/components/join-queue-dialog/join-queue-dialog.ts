@@ -31,8 +31,8 @@ import { MatSelectModule } from '@angular/material/select';
 
         <mat-form-field appearance="fill" class="full-width">
           <mat-label>Party Size</mat-label>
-          <input matInput type="number" [(ngModel)]="data.partySize" name="partySize" required min="1" max="15">
-          <mat-error *ngIf="data.partySize > 15">Max party size is 15</mat-error>
+          <input matInput type="number" [(ngModel)]="data.partySize" name="partySize" required min="1" max="20">
+          <mat-error *ngIf="data.partySize > 20">Max party size is 20</mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="fill" class="full-width">
@@ -46,7 +46,7 @@ import { MatSelectModule } from '@angular/material/select';
     </mat-dialog-content>
     <mat-dialog-actions align="end">
       <button mat-button mat-dialog-close>Cancel</button>
-      <button mat-raised-button color="primary" [mat-dialog-close]="data" [disabled]="!data.name || !data.partySize || data.partySize > 15">Join</button>
+      <button mat-raised-button color="primary" [mat-dialog-close]="data" [disabled]="!data.name || !data.partySize || data.partySize > 20">Join</button>
     </mat-dialog-actions>
   `,
   styles: [`
